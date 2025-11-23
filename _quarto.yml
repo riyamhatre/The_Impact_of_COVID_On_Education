@@ -6,11 +6,11 @@ execute:
   echo: true
 
 book:
-  title: "YOUR PROJECT TITLE"
+  title: "The_Impact_of_COVID_On_Education"
   author:
-    - AUTHOR1 (UNI1)
-    - AUTHOR2 (UNI2)
-  repo-url: https://github.com/YOUR_GITHUB_ACCOUNT/REPO_NAME
+    - Riya Mhatre (rnm2134)
+    - Aarya Dharm (add2180)
+  repo-url: https://github.com/riyamhatre/The_Impact_of_COVID_On_Education
   date: today
   page-footer:
     right: |
