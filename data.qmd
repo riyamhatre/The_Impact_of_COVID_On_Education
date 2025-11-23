@@ -1,5 +1,68 @@
 # Data
 
 ## Description
+Our primary data source is the PISA dataset published by the Organization for Economic Cooperation and Development (OECD). The OECD is an international organization that develops standards that allow for more evidence based policies across the globe, including educational standards. Given its established reputation and collaboration with official governmental educational institutions, we believe this is a credible source.
+
+Disregarding a delay due to the pandemic, the PISA assessment is conducted once every three years and aims to evaluate the knowledge and skills of 15-year-old students in reading, mathematics, and science. By simulating real-world situations, the test aims to determine whether students can apply their knowledge rather than merely memorizing. The data is collected through a standardized testing approach with consistent administration environments in each country participating in the data collection. This ensures that it can be compared across countries.
+
+For this project’s analysis, we will be using the PISA data from 2018 (pre-pandemic) and 2022 (post-pandemic) which are available on the published PISA reports on the OECD official website. The datasets are provided in XLSX formats with each file containing each country, their corresponding PISA scores, and country statistics (like GDP and education spending).
+
+In the report, there are many different tables and datasets that are available for our use. We want to use the table where we have the average scores for each country, ranked from highest to lowest. PISA 2018 was last updated in December 2019, but there is no definite update date for PISA 2022, which we can assume to be sometime around the end of 2022. 
+
+One issue with the data is that though the OECD strives to maintain consistency across years, the pandemic caused various disruptions which, though documented clearly, could introduce noise into some cross country comparisons. However, this project is focusing on change from pre- to post-pandemic so cross country comparisons will be seldom made. 
+
+Something we want to be cognizant of is the fact that these scores might be fluctuating over the years due to other factors independent of the pandemic. To take care of this, we are planning to look into other data sources. 
+
+Data:
+
+https://www.oecd.org/en/publications/pisa-2018-results-volume-i_5f07c754-en.html 
+
+https://www.oecd.org/en/data/datasets/pisa-2022-database.html 
+
+Besides overarching global comparisons, we wanted to dive deeper into a few countries and analyze what actions they took regarding education during the pandemic and how that might explain their difference in PISA scores.
+
+Finland: 
+
+For Finland, we found various datasets in research papers looking for the effect of the pandemic on education in Finland. 
+
+The first paper we found was written by Harvard’s Department of Education and published in 2023. It provides several analyses of student/teacher engagement, burnout, and general attitudes throughout the pandemic. 
+
+Data: 
+
+https://link.springer.com/chapter/10.1007/978-3-031-42671-1_4
+
+https://link.springer.com/article/10.1007/s10902-022-00518-1/tables/3 
+
+Our second source is a report from the OECD which we’ve already explained is a highly credible source, and was published in December of 2020. This source puts together several data sources that discuss the actions Finland took to switch to distance learning and the impact of them.
+
+Data:
+
+https://www.oecd.org/content/dam/oecd/en/about/projects/edu/education-policy-outlook/covid-snapshot-Finland.pdf 
+
+United States:
+
+In addition to Finland, we decided to look into data from the US. Google has health data for COVID-19 that is credible and verified. It is one of the largest collections of COVID data available to use, compiled from various sources. Through this dataset, we can examine how the different factors, such as socioeconomic factors, can affect how the virus affected various groups of people, giving us a better understanding of the effects of the pandemic. 
+
+Data: https://health.google.com/covid-19/open-data/raw-data
+
+The 2021-2022 School Learning Modalities dataset contains information about the learning modality for primary and secondary schools. The data was aggregated from multiple data sources to determine the likely learning modality of the school district. The data was provided by the CDC. 
+
+Data: https://healthdata.gov/National/School-Learning-Modalities-2021-2022/aitj-yx37/about_data
+
+The final dataset is from the National Center for Education Statistics and it is data regarding the U.S. education at the time of COVID. There’s a variety of data regarding the activities of people during this time, such as the number of adults with children who had their students attending summer programs or working with private tutors. We hope to use this data to gain more data about the ways students and parents coped with the changes in education during this turbulent time.
+
+Data: https://nces.ed.gov/surveys/annualreports/topical-studies/covid/ 
 
 ## Missing value analysis
+
+** dont have it for a couple of years --> alluvial 
+
+
+*** TASKS 
+- one person --> overarching Q
+- one person --> by country (finland and us)
+** statiscal tests
+
+
+
+
