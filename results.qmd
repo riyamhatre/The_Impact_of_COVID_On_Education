@@ -1,1 +1,7 @@
 # Results
+
+```{r}
+pisa2018 <- read.csv('data/PISA2018.csv')
+pisa2018
+```
+
