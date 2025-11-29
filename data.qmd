@@ -61,7 +61,8 @@ Data: https://nces.ed.gov/surveys/annualreports/topical-studies/covid/
 *** TASKS 
 - one person --> overarching Q
 - one person --> by country (finland and us)
-** statiscal tests
+
+** statistical tests
 
 
 
