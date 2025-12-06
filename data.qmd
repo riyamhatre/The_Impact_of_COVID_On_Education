@@ -103,16 +103,33 @@ participation_df <- participation_long |>
   pivot_wider(
     names_from = year,
     values_from = status,
+    values_fn = ~ first(.x)
     # values_fill = "not participated"
-  ) |> 
-  mutate(freq = 1)
+  ) 
+
+participation_df$`2009` <- replace_na(participation_df$`2009`, "not participated")
+participation_df$`2012` <- replace_na(participation_df$`2012`, "not participated")
+participation_df$`2015` <- replace_na(participation_df$`2015`, "not participated")
+participation_df$`2018` <- replace_na(participation_df$`2018`, "not participated")
+participation_df$`2022` <- replace_na(participation_df$`2022`, "not participated")
+
+participation_df$total_participated <- rowSums(participation_df[, -1] == "participated", na.rm = TRUE)
 ```
+
 ```{r}
-ggplot(participation_df, aes(axis1 = "2009", axis2 = "2012", axis3 = "2015", axis4 = "2018", axis5="2022", y=freq)) +
-  geom_alluvium(color='black') +
-  geom_stratum() +
-  geom_text(stat = "stratum", aes(label = paste(after_stat(stratum), "\n", after_stat(count)))) +
-  scale_x_discrete(limits = years)
+ggplot(data = participation_df,
+       aes(axis1 = `2009`, axis2 = `2012`, axis3 = `2015`, axis4 = `2018`, axis5=`2022`)) +
+  geom_alluvium(aes(fill = total_participated), alpha = 0.7) +
+  geom_stratum(alpha = 0.9) +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum)), size = 3) +
+  scale_x_discrete(limits = c("2018", "2019", "2020", "2021"), 
+                   expand = c(0.15, 0.05)) +
+  theme_minimal() +
+  labs(title = "Country Participation Over Time",
+       y = "Number of Countries") +
+  theme(legend.position = "right",
+        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+        axis.title.x = element_blank())
 ```
 
 
