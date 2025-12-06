@@ -53,9 +53,68 @@ The final dataset is from the National Center for Education Statistics and it is
 
 Data: https://nces.ed.gov/surveys/annualreports/topical-studies/covid/ 
 
+## Required Packages and Data Loading
+```{r}
+# install.packages(c("dplyr","tidyr","ggplot2","ggalluvial","forcats"))
+library(dplyr) 
+library(tidyr)
+library(tidyverse)
+library(ggplot2)
+library(ggalluvial)
+library(forcats)
+# library(purrr)
+```
+
+```{r}
+# Loading in the PISA datasets:
+pisa2009 <- read.csv('data/2009_PISA.csv')
+pisa2012 <- read.csv('data/2012_PISA.csv')
+pisa2015 <- read.csv('data/2015_PISA.csv')
+pisa2018 <- read.csv('data/2018_PISA.csv')
+pisa2022 <- read.csv('data/2022_PISA.csv')
+```
+
+
 ## Missing value analysis
 
 ** dont have it for a couple of years --> alluvial 
+
+```{r}
+# List of country participation across years:
+participation_list <- list(
+  '2009' = pisa2009$X,
+  '2012' = pisa2012$Country,
+  '2015' = pisa2015$X,
+  '2018' = pisa2018$Country,
+  '2022' = pisa2022$Country
+)
+
+# row and column values
+all_countries <- unique(unlist(participation_list))
+years <- names(participation_list)
+
+# dataframe used for alluvial
+participation_long <- participation_list |>
+  enframe(name = "year", value = "country") |>
+  unnest(country) |>
+  mutate(status = "participated")
+
+participation_df <- participation_long |>
+  pivot_wider(
+    names_from = year,
+    values_from = status,
+    # values_fill = "not participated"
+  ) |> 
+  mutate(freq = 1)
+```
+```{r}
+ggplot(participation_df, aes(axis1 = "2009", axis2 = "2012", axis3 = "2015", axis4 = "2018", axis5="2022", y=freq)) +
+  geom_alluvium(color='black') +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = paste(after_stat(stratum), "\n", after_stat(count)))) +
+  scale_x_discrete(limits = years)
+```
+
 
 
 *** TASKS 
