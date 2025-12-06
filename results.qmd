@@ -5,3 +5,51 @@ pisa2018 <- read.csv('data/PISA2018.csv')
 pisa2018
 ```
 
+### global trends 
+- missing data (separate thing)
+- line plot of the the average scores over time (1)
+- interesting to predict what 2022 would be given 2009-2018 (1) 
+- GDP for 2018 vs 2022 (1)
+- spending for 2018 vs 2022 (1)
+---> shit on countries 
+---> see if there is a correlation between COVID and GDP, COVID and spending
+
+
+
+
+
+```{r}
+library(dplyr)
+library(forcats)
+library(vcd)
+#https://healthdata.gov/browse?q=school+learning+modalities&sortBy=relevance&pageSize=20
+
+df <- read.csv("data/school_modality.csv") |>
+  mutate(
+    Learning_Modality = as.factor(Learning_Modality),
+    Year = as.factor(Year)
+  )
+
+counts <- df |>
+  group_by(Year, Learning_Modality) |>
+  summarize(Freq = sum(Count), .groups = "drop")
+
+tbl <- xtabs(Freq ~ Year + Learning_Modality, data = counts)
+
+colors_theme <- c("#FFB6B9", "#FAE3D9", "#61C0BF")
+
+mosaic(
+  tbl,
+  direction = c("v", "h"),
+  highlighting = "Learning_Modality",
+  highlighting_fill = colors_theme,
+  main = "Learning Modality by Year")
+
+
+```
+
+
+#### school modality 
+- bar graph for the states (1)
+- mosaic for the modality (3 categories) (1)
+
