@@ -5,6 +5,69 @@
 - spending vs pisa 
 ### global trends 
 - missing data (separate thing)
+- distributions of each year's scores ridgeline plot (1)
+```{r}
+all_reading_scores <- list(
+  `2009` = pisa2009$On.the.overall.reading.scale,
+  `2012` = pisa2012$Mean.score.in.PISA.2012...Reading,
+  `2015` = pisa2015$Mean.score.in.PISA.2015...Reading,
+  `2018` = pisa2018$Reading.Mean,
+  `2022` = pisa2022$Reading.Mean
+)
+
+all_math_scores <- list(
+  `2009` = pisa2009$On.the.mathematics.scale,
+  `2012` = pisa2012$Mean.score.in.PISA.2012...Mathematics,
+  `2015` = pisa2015$Mean.score.in.PISA.2015...Mathematics,
+  `2018` = pisa2018$Mathematics.Mean,
+  `2022` = pisa2022$Mathematics.Mean
+)
+
+all_science_scores <- list(
+  `2009` = pisa2009$On.the.overall.science.scale,
+  `2012` = pisa2012$Mean.score.in.PISA.2012...Science,
+  `2015` = pisa2015$Mean.score.in.PISA.2015...Science,
+  `2018` = pisa2018$Science.Mean,
+  `2022` = pisa2022$Science.Mean
+)
+
+all_scores <- data.frame(country = all_countries) |>
+  left_join(select(pisa2009, X, On.the.overall.reading.scale), by=c("country" = "X")) |>
+  left_join(select(pisa2012, Country, Mean.score.in.PISA.2012...Reading), by=c("country" = "Country")) |>
+  left_join(select(pisa2015, X, Mean.score.in.PISA.2015...Reading), by=c("country" = "X")) |>
+  left_join(select(pisa2018, Country, Reading.Mean), by=c("country" = "Country")) |>
+  left_join(select(pisa2022, Country, Reading.Mean), by=c("country" = "Country")) |>
+  rename(`2009`=On.the.overall.reading.scale, `2012`=Mean.score.in.PISA.2012...Reading, `2015`=Mean.score.in.PISA.2015...Reading, `2018`=Reading.Mean.x, `2022`=Reading.Mean.y) |>
+  mutate(across(c(`2009`, `2012`, `2015`, `2018`, `2022`), as.numeric))
+  
+all_scores_long <- all_scores |>
+  pivot_longer(!country, names_to="year", values_to="score")
+
+all_scores_long
+```
+
+```{r}
+ggplot(all_scores_long, aes(x = score, y = fct_reorder(year, score, .fun = median))) +
+  geom_density_ridges(fill = "blue") +
+  ggtitle("Overall PISA Scores Over Time") +
+  ylab("year")
+```
+
+
+- cleavland dot plot of all countries scores 2018 and 2022 (1)
+```{r}
+all_scores_long |>
+  filter(year > 2017) |>
+  filter(!is.na(score)) |>
+  ggplot(aes(x = score, y = fct_reorder2(country, year=="2022", score), color=as.factor(year))) +
+  geom_point(alpha=0.5) +
+  ggtitle("PISA Scores in 2018 vs. 2022") +
+  ylab("") +
+  theme_linedraw()
+```
+
+
+
 - line plot of the the average scores over time (1)
 ```{r}
 # Reading scores data
@@ -17,7 +80,7 @@ reading_scores <- list(
 )
 
 reading_scores_df <- data.frame(
-  year = as.integer(names(reading_scores)),
+  year = as.numeric(names(reading_scores)),
   reading_score = as.numeric(unlist(reading_scores)),
   row.names = NULL
 )
@@ -32,7 +95,7 @@ math_scores <- list(
 )
 
 math_scores_df <- data.frame(
-  year = as.integer(names(math_scores)),
+  year = as.numeric(names(math_scores)),
   math_score = as.numeric(unlist(math_scores)),
   row.names = NULL
 )
@@ -46,7 +109,7 @@ science_scores <- list(
 )
 
 science_scores_df <- data.frame(
-  year = as.integer(names(science_scores)),
+  year = as.numeric(names(science_scores)),
   science_score = as.numeric(unlist(science_scores)),
   row.names = NULL
 )
@@ -56,11 +119,12 @@ science_scores_df <- data.frame(
 # Plotting scores
 ggplot(reading_scores_df, aes(year, reading_score)) + 
   geom_point() +
+  geom_point() + 
   labs(x = "Year", y = "OECD Average Reading Scores") +
   ggtitle("OECD Average Reading Scores from 2012-2022")
 
-ggplot(math_scores_df, aes(year, math_score)) + 
-  geom_point() +
+ggplot(math_scores_df, aes(x=year, y=math_score)) + 
+  geom_bar(stat = "identity") +
   labs(x = "Year", y = "OECD Average Math Scores") +
   ggtitle("OECD Average Math Scores from 2012-2022")
 
