@@ -1,6 +1,8 @@
 # Results
 
-
+- PISA scores for US vs finland 
+- GDP vs pisa
+- spending vs pisa 
 ### global trends 
 - missing data (separate thing)
 - line plot of the the average scores over time (1)
@@ -273,83 +275,55 @@ mosaic(
 data <- read.csv("data/school_burnout_finland.csv")
 data <- data %>%
   rename(
-    Comprehensive = colnames(data)[3],
-    High_school = colnames(data)[4],
-    Vocational = colnames(data)[5]
+    High_school = colnames(data)[4]
   )
+usa_burnout <- read.csv("data/USA_burnout.csv")
 
-library(tidyr) 
+names(usa_burnout)[2] <- "High School"
+names(data)[4] <- "High School"
+
+merged_data_burnout <- merge(usa_burnout, data, by = "Year")
+
+names(merged_data_burnout)[2] <- 'USA'
+names(merged_data_burnout)[5] <- 'Finland'
+
+data_subset <- merged_data_burnout %>%
+  select('Year', 'USA', 'Finland')
+
+```
+
+
+```{r}
+
+library(tidyverse)
 library(ggplot2)
 
-data_long <- data %>%
+data_long <- data_subset %>%
   pivot_longer(
-    cols = c(Comprehensive, High_school, Vocational),
-    names_to = "School_Type",
-    values_to = "Percentage"
+    cols = c("USA", "Finland"),
+    names_to = "Country",
+    values_to = "Percent"
   )
 
-color_map <- c(
-  "Comprehensive" = "#377EB8",    
-  "High_school" = "#6495ED",      
-  "Vocational" = "#800080"        
-)
-
-label_map <- c(
-  "Comprehensive" = "Comprehensive school grades 8 and 9",
-  "High_school" = "High school grades 10 and 11",
-  "Vocational" = "Vocational school"
-)
-
-# Create the plot
-final_plot <- ggplot(data_long, aes(x = Year, y = Percentage, color = School_Type)) +
-  # Add the lines
-  geom_line(linewidth = 1) +
-  # Add the points (circles)
-  geom_point(size = 3) +
+# 4. Create the Line Plot using ggplot2
+# Option A: Recommended Method (using expand_limits)
+ggplot(data = data_long, aes(x = Year, y = Percent, color = Country)) +
+  geom_line(linewidth = 1) + 
+  geom_point(size = 3) + 
   
-  # Set the custom colors and labels for the legend
-  scale_color_manual(
-    values = color_map, 
-    labels = label_map,
-    name = NULL # Remove legend title
-  ) +
+  # 👇 This forces the y-axis to include 0
+  expand_limits(y = 0) + 
   
-  scale_x_continuous(
-    breaks = data$Year,
-    # Use the custom labels from the original graph
-    labels = c("2006-2007", "2008-2009", "2010-2011", "2013", "2015", "2017", "2019", "2021"),
-    expand = expansion(add = c(0.5, 0.5))
-  ) +
-  
-  # Customize the Y-axis (Percentage)
-  scale_y_continuous(
-    limits = c(0, 24),
-    breaks = seq(0, 24, by = 2)
-  ) +
-  
-  # Add labels
+  # Add labels and theme... (rest of the code remains the same)
   labs(
-    x = "Year",
-    y = "Percentage of students reporting burnout"
+    title = "Student Burnout (Persistent Sadness) Trends: USA vs. Finland",
+    y = "Percent of Students (%)",
+    x = "Year"
   ) +
-  
-  # Apply a clean theme and make further visual adjustments
   theme_minimal() +
-  theme(
-    # Position the legend at the bottom
-    legend.position = "bottom",
-    # Customize axis title size and boldness
-    axis.title = element_text(size = 12, face = "bold"),
-    # Set plot/panel background to white
-    plot.background = element_rect(fill = "white", color = NA),
-    panel.background = element_rect(fill = "white", color = NA),
-    # Use light grey lines for major grid
-    panel.grid.major = element_line(color = "grey80"),
-    panel.grid.minor = element_blank()
-  )
-
-# Display the plot
-print(final_plot)
+  
+  # Customize the color legend title
+  scale_color_discrete(name = "Country")
 ```
 
 ```{r}
@@ -436,11 +410,5 @@ cynicism_plot <- ggplot(data_cynicism_long, aes(x = Year, y = Percentage, color 
 print(cynicism_plot)
 ```
 
-
-```{r}
-
- 
-
-```
 
 
