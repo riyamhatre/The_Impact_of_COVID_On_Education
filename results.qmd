@@ -15,10 +15,131 @@ pisa2018
 ---> see if there is a correlation between COVID and GDP, COVID and spending
 
 
+```{r}
+GDP_precovid<- read.csv('data/2018_GDP.csv')
+spending_precovid<- read.csv('data/2018_Spending.csv')
+
+merged_data <- merge(GDP_precovid, spending_precovid, by = "Country")
+```
+
 
 
 
 ```{r}
+library(ggplot2)
+library(ggrepel)
+library(scales) # Required for label_number()
+
+# Define the specific countries you want to label
+target_countries <- c("Qatar", "Macao (China)", "Singapore", "Austria", "Iceland",'Finland')
+
+ggplot(merged_data, aes(x = GDP, y = Spending)) +
+  geom_point(color = "blue", size = 2) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "grey50") +
+  geom_smooth(method = "lm", se = FALSE, color = "darkred") +
+  
+  geom_text_repel(
+    # Filter data to only label the target countries
+    data = merged_data[merged_data$Country %in% target_countries, ], 
+    aes(label = Country), 
+    size = 3,                       
+    segment.color = 'grey50',       
+    segment.size = 0.2,             
+    box.padding = unit(0.5, "lines"), 
+    point.padding = unit(0.5, "lines"),
+    force = 2
+  ) +
+  
+  # Set X-axis limits and format (NO scientific notation)
+  scale_x_continuous(
+    labels = label_number(big.mark = ","), # Format to full number with commas
+    limits = c(0, max(merged_data$GDP) * 1.05) # Incorporate the limit here
+  ) +
+  
+  # Set Y-axis limits and format (NO scientific notation)
+  scale_y_continuous(
+    labels = label_number(big.mark = ","), # Format to full number with commas
+    limits = c(0, max(merged_data$Spending) * 1.05) # Incorporate the limit here
+  ) +
+  
+  # Labels and Theme
+  labs(
+    title = "GDP vs. Spending Correlation (2018) - Selected Countries Highlighted",
+    x = "GDP (in currency units from table)",
+    y = "Spending (in currency units from table)",
+    caption = "Linear trend line (dark red) shows relationship. Dashed line (grey) is y=x."
+  ) +
+  theme_minimal() 
+
+# dashed is y = x
+```
+```{r}
+
+GDP_postcovid<- read.csv('data/2022_GDP.csv')
+spending_postcovid<- read.csv('data/2022_Spending.csv')
+
+merged_data2 <- merge(GDP_postcovid, spending_postcovid, by = "Country")
+names(merged_data2)[2] <- "GDP"
+```
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+library(scales) # Required for label_number()
+
+# Define the specific countries you want to label
+target_countries <- c("Qatar", "Macao (China)", "Luxembourg", "Singapore", "Austria", "Iceland", 'Finland')
+
+ggplot(merged_data2, aes(x = GDP, y = Spending)) +
+  geom_point(color = "blue", size = 2) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "grey50") +
+  geom_smooth(method = "lm", se = FALSE, color = "darkred") +
+  
+  geom_text_repel(
+    # Filter data to only label the target countries
+    data = merged_data2[merged_data2$Country %in% target_countries, ], 
+    aes(label = Country), 
+    size = 3,                       
+    segment.color = 'grey50',       
+    segment.size = 0.2,             
+    box.padding = unit(0.5, "lines"), 
+    point.padding = unit(0.5, "lines"),
+    force = 2
+  ) +
+  
+  # Set X-axis limits and format (NO scientific notation)
+  scale_x_continuous(
+    labels = label_number(big.mark = ","), # Format to full number with commas
+    limits = c(0, max(merged_data2$GDP) * 1.05) # Incorporate the limit here
+  ) +
+  
+  # Set Y-axis limits and format (NO scientific notation)
+  scale_y_continuous(
+    labels = label_number(big.mark = ","), # Format to full number with commas
+    limits = c(0, max(merged_data2$Spending) * 1.05) # Incorporate the limit here
+  ) +
+  
+  # Labels and Theme
+  labs(
+    title = "GDP vs. Spending Correlation (2018) - Selected Countries Highlighted",
+    x = "GDP (in currency units from table)",
+    y = "Spending (in currency units from table)",
+    caption = "Linear trend line (dark red) shows relationship. Dashed line (grey) is y=x."
+  ) +
+  theme_minimal() 
+
+# dashed is y = x
+```
+
+
+
+#### school modality 
+- bar graph for the states (1)
+- mosaic for the modality (3 categories) (1)
+
+```{r}
+
+#### school modality 
 library(dplyr)
 library(forcats)
 library(vcd)
@@ -44,12 +165,179 @@ mosaic(
   highlighting = "Learning_Modality",
   highlighting_fill = colors_theme,
   main = "Learning Modality by Year")
+```
+```{r}
+data <- read.csv("data/school_burnout_finland.csv")
+data <- data %>%
+  rename(
+    Comprehensive = colnames(data)[3],
+    High_school = colnames(data)[4],
+    Vocational = colnames(data)[5]
+  )
+
+library(tidyr) 
+library(ggplot2)
+
+data_long <- data %>%
+  pivot_longer(
+    cols = c(Comprehensive, High_school, Vocational),
+    names_to = "School_Type",
+    values_to = "Percentage"
+  )
+
+color_map <- c(
+  "Comprehensive" = "#377EB8",    
+  "High_school" = "#6495ED",      
+  "Vocational" = "#800080"        
+)
+
+label_map <- c(
+  "Comprehensive" = "Comprehensive school grades 8 and 9",
+  "High_school" = "High school grades 10 and 11",
+  "Vocational" = "Vocational school"
+)
+
+# Create the plot
+final_plot <- ggplot(data_long, aes(x = Year, y = Percentage, color = School_Type)) +
+  # Add the lines
+  geom_line(linewidth = 1) +
+  # Add the points (circles)
+  geom_point(size = 3) +
+  
+  # Set the custom colors and labels for the legend
+  scale_color_manual(
+    values = color_map, 
+    labels = label_map,
+    name = NULL # Remove legend title
+  ) +
+  
+  scale_x_continuous(
+    breaks = data$Year,
+    # Use the custom labels from the original graph
+    labels = c("2006-2007", "2008-2009", "2010-2011", "2013", "2015", "2017", "2019", "2021"),
+    expand = expansion(add = c(0.5, 0.5))
+  ) +
+  
+  # Customize the Y-axis (Percentage)
+  scale_y_continuous(
+    limits = c(0, 24),
+    breaks = seq(0, 24, by = 2)
+  ) +
+  
+  # Add labels
+  labs(
+    x = "Year",
+    y = "Percentage of students reporting burnout"
+  ) +
+  
+  # Apply a clean theme and make further visual adjustments
+  theme_minimal() +
+  theme(
+    # Position the legend at the bottom
+    legend.position = "bottom",
+    # Customize axis title size and boldness
+    axis.title = element_text(size = 12, face = "bold"),
+    # Set plot/panel background to white
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
+    # Use light grey lines for major grid
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_blank()
+  )
+
+# Display the plot
+print(final_plot)
+```
+
+```{r}
+data_cynicism <- read.csv("data/cynicism_finland.csv")
+data_cynicism <- data_cynicism %>%
+  rename(
+    Comprehensive = colnames(data_cynicism)[3],
+    High_school = colnames(data_cynicism)[4],
+    Vocational = colnames(data_cynicism)[5]
+  )
+
+# Load the necessary libraries (if not already loaded)
+library(tidyr) 
+library(ggplot2)
+
+# Convert data to long format for easier plotting
+data_cynicism_long <- data_cynicism %>%
+  pivot_longer(
+    # Select the three school columns for pivoting
+    cols = c(Comprehensive, High_school, Vocational),
+    names_to = "School_Type",
+    values_to = "Percentage"
+  )
 
 
+color_map <- c(
+  "Comprehensive" = "#377EB8",    # Darker Blue
+  "High_school" = "#6495ED",      # Lighter Blue/Teal
+  "Vocational" = "#800080"        # Purple/Maroon
+)
+
+label_map <- c(
+  "Comprehensive" = "Comprehensive school grades 8 and 9",
+  "High_school" = "High school grades 10 and 11",
+  "Vocational" = "Vocational school"
+)
+
+# Create the plot
+cynicism_plot <- ggplot(data_cynicism_long, aes(x = Year, y = Percentage, color = School_Type)) +
+  # Add the lines
+  geom_line(linewidth = 1) +
+  # Add the points (circles)
+  geom_point(size = 3) +
+  
+  # Set the custom colors and labels for the legend
+  scale_color_manual(
+    values = color_map, 
+    labels = label_map,
+    name = NULL # Remove legend title
+  ) +
+  
+  # Customize the X-axis (Years)
+  scale_x_continuous(
+    breaks = data_cynicism$Year,
+    # Use the custom labels, noting 2013 and 2017 are single years in this set
+    labels = c("2007", "2009", "2011", "2013", "2017", "2019", "2021"),
+    expand = expansion(add = c(0.5, 0.5))
+  ) +
+  
+  # Customize the Y-axis (Percentage) - Adjusted for higher values
+  scale_y_continuous(
+    limits = c(0, 40), # Set the y-axis range to accommodate up to 35.5
+    breaks = seq(0, 40, by = 5) # Set breaks every 5 units
+  ) +
+  
+  # Add labels
+  labs(
+    x = "Year",
+    y = "Percentage of students reporting cynicism"
+  ) +
+  
+  # Apply the clean theme
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    axis.title = element_text(size = 12, face = "bold"),
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_blank()
+  )
+
+# Display the plot
+print(cynicism_plot)
 ```
 
 
-#### school modality 
-- bar graph for the states (1)
-- mosaic for the modality (3 categories) (1)
+```{r}
+
+ 
+
+```
+
 
