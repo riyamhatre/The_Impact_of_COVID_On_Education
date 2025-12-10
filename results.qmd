@@ -3,31 +3,8 @@
 - missing data (separate thing)
 - distributions of each year's scores ridgeline plot (1)
 ```{r}
-all_reading_scores <- list(
-  `2009` = pisa2009$On.the.overall.reading.scale,
-  `2012` = pisa2012$Mean.score.in.PISA.2012...Reading,
-  `2015` = pisa2015$Mean.score.in.PISA.2015...Reading,
-  `2018` = pisa2018$Reading.Mean,
-  `2022` = pisa2022$Reading.Mean
-)
-
-all_math_scores <- list(
-  `2009` = pisa2009$On.the.mathematics.scale,
-  `2012` = pisa2012$Mean.score.in.PISA.2012...Mathematics,
-  `2015` = pisa2015$Mean.score.in.PISA.2015...Mathematics,
-  `2018` = pisa2018$Mathematics.Mean,
-  `2022` = pisa2022$Mathematics.Mean
-)
-
-all_science_scores <- list(
-  `2009` = pisa2009$On.the.overall.science.scale,
-  `2012` = pisa2012$Mean.score.in.PISA.2012...Science,
-  `2015` = pisa2015$Mean.score.in.PISA.2015...Science,
-  `2018` = pisa2018$Science.Mean,
-  `2022` = pisa2022$Science.Mean
-)
-
-all_scores <- data.frame(country = all_countries) |>
+# Reading Scores Full Table
+all_reading_scores <- data.frame(country = all_countries) |>
   left_join(select(pisa2009, X, On.the.overall.reading.scale), by=c("country" = "X")) |>
   left_join(select(pisa2012, Country, Mean.score.in.PISA.2012...Reading), by=c("country" = "Country")) |>
   left_join(select(pisa2015, X, Mean.score.in.PISA.2015...Reading), by=c("country" = "X")) |>
@@ -36,14 +13,48 @@ all_scores <- data.frame(country = all_countries) |>
   rename(`2009`=On.the.overall.reading.scale, `2012`=Mean.score.in.PISA.2012...Reading, `2015`=Mean.score.in.PISA.2015...Reading, `2018`=Reading.Mean.x, `2022`=Reading.Mean.y) |>
   mutate(across(c(`2009`, `2012`, `2015`, `2018`, `2022`), as.numeric))
   
-all_scores_long <- all_scores |>
-  pivot_longer(!country, names_to="year", values_to="score")
+all_reading_scores_long <- all_reading_scores |>
+  pivot_longer(!country, names_to="year", values_to="score") |>
+  mutate(across(c(year), as.numeric))
 
-all_scores_long
+# Math Scores Full Table
+all_math_scores <- data.frame(country = all_countries) |>
+  left_join(select(pisa2009, X, On.the.mathematics.scale), by=c("country" = "X")) |>
+  left_join(select(pisa2012, Country, Mean.score.in.PISA.2012...Mathematics), by=c("country" = "Country")) |>
+  left_join(select(pisa2015, X, Mean.score.in.PISA.2015...Mathematics), by=c("country" = "X")) |>
+  left_join(select(pisa2018, Country, Mathematics.Mean), by=c("country" = "Country")) |>
+  left_join(select(pisa2022, Country, Mathematics.Mean), by=c("country" = "Country")) |>
+  rename(`2009`=On.the.mathematics.scale, `2012`=Mean.score.in.PISA.2012...Mathematics, `2015`=Mean.score.in.PISA.2015...Mathematics, `2018`=Mathematics.Mean.x, `2022`=Mathematics.Mean.y) |>
+  mutate(across(c(`2009`, `2012`, `2015`, `2018`, `2022`), as.numeric))
+  
+all_math_scores_long <- all_math_scores |>
+  pivot_longer(!country, names_to="year", values_to="score") |>
+  mutate(across(c(year), as.numeric))
+
+# Science Scores Full Table
+all_science_scores <- data.frame(country = all_countries) |>
+  left_join(select(pisa2009, X, On.the.science.scale), by=c("country" = "X")) |>
+  left_join(select(pisa2012, Country, Mean.score.in.PISA.2012...Science), by=c("country" = "Country")) |>
+  left_join(select(pisa2015, X, Mean.score.in.PISA.2015...Science), by=c("country" = "X")) |>
+  left_join(select(pisa2018, Country, Science.Mean), by=c("country" = "Country")) |>
+  left_join(select(pisa2022, Country, Science.Mean), by=c("country" = "Country")) |>
+  rename(`2009`=On.the.science.scale, `2012`=Mean.score.in.PISA.2012...Science, `2015`=Mean.score.in.PISA.2015...Science, `2018`=Science.Mean.x, `2022`=Science.Mean.y) |>
+  mutate(across(c(`2009`, `2012`, `2015`, `2018`, `2022`), as.numeric))
+  
+all_science_scores_long <- all_science_scores |>
+  pivot_longer(!country, names_to="year", values_to="score") |>
+  mutate(across(c(year), as.numeric))
+
+# Combining all scores
+all_scores_long <- bind_rows(
+  mutate(all_reading_scores_long, subject = "reading"),
+  mutate(all_math_scores_long, subject = "math"),
+  mutate(all_science_scores_long, subject = "science")
+)
 ```
 
 ```{r}
-ggplot(all_scores_long, aes(x = score, y = fct_reorder(year, score, .fun = median))) +
+ggplot(all_scores_long, aes(x = score, y = as.factor(year))) +
   geom_density_ridges(fill = "blue") +
   ggtitle("Overall PISA Scores Over Time") +
   ylab("year")
@@ -65,87 +76,47 @@ all_scores_long |>
 
 
 - line plot of the the average scores over time (1)
-```{r}
-# Reading scores data
-reading_scores <- list(
-  # `2009` = mean(pisa2009$On.the.overall.reading.scale),
-  `2012` = filter(pisa2012, Country == 'OECD average')$Mean.score.in.PISA.2012...Reading,
-  `2015` = filter(pisa2015, X == 'OECD average')$Mean.score.in.PISA.2015...Reading,
-  `2018` = filter(pisa2018, Country == 'OECD average')$Reading.Mean,
-  `2022` = filter(pisa2022, Country == 'OECD average')$Reading.Mean
-)
 
-reading_scores_df <- data.frame(
-  year = as.numeric(names(reading_scores)),
-  reading_score = as.numeric(unlist(reading_scores)),
-  row.names = NULL
-)
-
-# Mathematics scores data
-math_scores <- list(
-  # `2009` = mean(pisa2009$On.the.mathematics.scale),
-  `2012` = filter(pisa2012, Country == 'OECD average')$Mean.score.in.PISA.2012...Mathematics,
-  `2015` = filter(pisa2015, X == 'OECD average')$Mean.score.in.PISA.2015...Mathematics,
-  `2018` = filter(pisa2018, Country == 'OECD average')$Mathematics.Mean,
-  `2022` = filter(pisa2022, Country == 'OECD average')$Mathematics.Mean
-)
-
-math_scores_df <- data.frame(
-  year = as.numeric(names(math_scores)),
-  math_score = as.numeric(unlist(math_scores)),
-  row.names = NULL
-)
-# Science scores data
-science_scores <- list(
-  # `2009` = mean(pisa2009$On.the.science.scale),
-  `2012` = filter(pisa2012, Country == 'OECD average')$Mean.score.in.PISA.2012...Science,
-  `2015` = filter(pisa2015, X == 'OECD average')$Mean.score.in.PISA.2015...Science,
-  `2018` = filter(pisa2018, Country == 'OECD average')$Science.Mean,
-  `2022` = filter(pisa2022, Country == 'OECD average')$Science.Mean
-)
-
-science_scores_df <- data.frame(
-  year = as.numeric(names(science_scores)),
-  science_score = as.numeric(unlist(science_scores)),
-  row.names = NULL
-)
-```
 
 ```{r}
 # Plotting scores
-ggplot(reading_scores_df, aes(year, reading_score)) + 
-  geom_point() +
-  geom_point() + 
+ggplot(filter(all_reading_scores_long, country == "OECD average"), aes(year, score)) + 
+  geom_point(data = filter(all_reading_scores_long, year > 2010), aes(x=year, y=score), position='jitter') +
+  geom_point(size=4, color="red") +
   labs(x = "Year", y = "OECD Average Reading Scores") +
   ggtitle("OECD Average Reading Scores from 2012-2022")
 
-ggplot(math_scores_df, aes(x=year, y=math_score)) + 
-  geom_bar(stat = "identity") +
+ggplot(filter(all_math_scores_long, country == "OECD average"), aes(x=year, y=score)) + 
+  geom_point(data = filter(all_math_scores_long, year > 2010), aes(x=year, y=score), position='jitter') +
+  geom_point(size=4, color="red") +
   labs(x = "Year", y = "OECD Average Math Scores") +
   ggtitle("OECD Average Math Scores from 2012-2022")
 
-ggplot(science_scores_df, aes(year, science_score)) + 
-  geom_point() +
+ggplot(filter(all_science_scores_long, country == "OECD average"), aes(year, score)) + 
+  geom_point(data = filter(all_science_scores_long, year > 2010), aes(x=year, y=score), position='jitter') +
+  geom_point(size=4, color="red") +
   labs(x = "Year", y = "OECD Average Science Scores") +
   ggtitle("OECD Average Science Scores from 2012-2022")
+
+# Change the x axis to only show the years we wanna see
 ```
 
 - interesting to predict what 2022 would be given 2009-2018 (1) 
 
 ```{r}
 # Reading Predictions
-reading_scores_train <- reading_scores_df |>
-  filter(year < 2020)
-reading_model <- lm(reading_score ~ year, data = reading_scores_train)
+reading_scores_train <- all_reading_scores_long |>
+  filter(year < 2020, country == "OECD average")
+reading_model <- lm(score ~ year, data = reading_scores_train)
 
 # Predict for 2022
 predicted_value <- predict(reading_model, newdata = data.frame(year = 2022))
 print(predicted_value)
 
 # Plot new model
-ggplot(reading_scores_train, aes(year, reading_score)) + 
-  geom_point(data=reading_scores_df, aes(year, reading_score)) +
-  geom_smooth(method="lm") + 
+ggplot(reading_scores_train, aes(year, score)) + 
+  geom_point(data=filter(all_reading_scores_long, country == "OECD average"), aes(year, score)) +
+  geom_point(data=data.frame(year = 2022, score = predicted_value), color = "blue", size=3) +
   geom_abline(intercept = coef(reading_model)[1], slope = coef(reading_model)[2], 
               color = "blue", linewidth = 1) +
   labs(x = "Year", y = "OECD Average Reading Scores") +
@@ -154,25 +125,66 @@ ggplot(reading_scores_train, aes(year, reading_score)) +
 
 ```{r}
 # Math Predictions
-math_scores_train <- math_scores_df |>
-  filter(year < 2020)
-math_model <- lm(math_score ~ year, data = math_scores_train)
+math_scores_train <- all_math_scores_long |>
+  filter(year < 2020, country == "OECD average")
+math_model <- lm(score ~ year, data = math_scores_train)
 
 # Predict for 2022
 predicted_value <- predict(math_model, newdata = data.frame(year = 2022))
 print(predicted_value)
 
 # Plot new model
-ggplot(math_scores_train, aes(year, math_score)) + 
-  geom_point(data=math_scores_df, aes(year, math_score)) +
-  geom_smooth(method="lm") + 
+ggplot(math_scores_train, aes(year, score)) + 
+  geom_point(data=filter(all_math_scores_long, country == "OECD average"), aes(year, score)) +
+  geom_point(data=data.frame(year = 2022, score = predicted_value), color = "blue", size=3) +
   geom_abline(intercept = coef(math_model)[1], slope = coef(math_model)[2], 
               color = "blue", linewidth = 1) +
-  labs(x = "Year", y = "OECD Average Math Scores") +
-  ggtitle("Predicting 2022 OECD Average Math Score")
+  labs(x = "Year", y = "OECD Average Mathematics Scores") +
+  ggtitle("Predicting 2022 OECD Average Mathematics Score")
+```
+```{r}
+# Science Predictions
+science_scores_train <- all_science_scores_long |>
+  filter(year < 2020, country == "OECD average")
+science_model <- lm(score ~ year, data = science_scores_train)
+
+# Predict for 2022
+predicted_value <- predict(science_model, newdata = data.frame(year = 2022))
+print(predicted_value)
+
+# Plot new model
+ggplot(science_scores_train, aes(year, score)) + 
+  geom_point(data=filter(all_science_scores_long, country == "OECD average"), aes(year, score)) +
+  geom_point(data=data.frame(year = 2022, score = predicted_value), color = "blue", size=3) +
+  geom_abline(intercept = coef(science_model)[1], slope = coef(science_model)[2], 
+              color = "blue", linewidth = 1) +
+  labs(x = "Year", y = "OECD Average Science Scores") +
+  ggtitle("Predicting 2022 OECD Average Science Score")
 ```
 
 - GDP for 2018 vs 2022 (1)
+```{r}
+gdp_2018 <- read.csv('data/2018_GDP.csv') |>
+  mutate(country = Country, score = Score, gdp = GDP, year="2018") |>
+  select("country", "score", "gdp", "year")
+gdp_2022 <- read.csv('data/2022_GDP.csv') |>
+  left_join(filter(all_reading_scores_long, year == 2022), by=c("Country" = "country")) |>
+  mutate(country = Country, gdp = GDP., year="2022") |>
+  select("country", "score", "gdp", "year")
+
+gdp <- bind_rows(gdp_2018, gdp_2022) 
+# |>
+  #pivot_wider(names_from = year, values_from = gdp, names_prefix = "gdp_", values_fn = first) |>
+  #mutate(change = gdp_2022 - gdp_2018)
+
+ggplot(gdp, aes(x = as.factor(year), y = gdp, group = country)) +
+  geom_line(aes(color = country), linewidth = 1) +
+  geom_point(size = 3) +
+  labs(title = "GDP Trend: 2018 to 2022",
+       x = "Year", y = "GDP") +
+  theme(legend.position = "none") 
+```
+
 
 - spending for 2018 vs 2022 (1)
 
