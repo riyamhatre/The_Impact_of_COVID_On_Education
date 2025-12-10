@@ -1,8 +1,4 @@
 # Results
-
-- PISA scores for US vs finland 
-- GDP vs pisa
-- spending vs pisa 
 ### global trends 
 - missing data (separate thing)
 - distributions of each year's scores ridgeline plot (1)
@@ -198,6 +194,7 @@ merged_data <- merge(GDP_precovid, spending_precovid, by = "Country")
 library(ggplot2)
 library(ggrepel)
 library(scales) # Required for label_number()
+#2018
 
 # Define the specific countries you want to label
 target_countries <- c("Qatar", "Macao (China)", "Singapore", "Austria", "Iceland",'Finland')
@@ -290,7 +287,7 @@ ggplot(merged_data2, aes(x = GDP, y = Spending)) +
   
   # Labels and Theme
   labs(
-    title = "GDP vs. Spending Correlation (2018) - Selected Countries Highlighted",
+    title = "GDP vs. Spending Correlation (2022) - Selected Countries Highlighted",
     x = "GDP (in currency units from table)",
     y = "Spending (in currency units from table)",
     caption = "Linear trend line (dark red) shows relationship. Dashed line (grey) is y=x."
@@ -335,25 +332,40 @@ mosaic(
   highlighting_fill = colors_theme,
   main = "Learning Modality by Year")
 ```
+- from 2020 to 2022, the USA changed learning modality due to pandemic
+- by the end of 2022, schools were back to hybrid
+- "K-12 public and independent charter school districts for the 2021-2022 school year and the Fall 2022 semester, from August 2021 – December 2022"
+
+```{r}
+
+usaburnout <- read.csv("data/USA_burnout.csv")
+ggplot(data = usaburnout, aes(x = Year, y = High_School)) +
+  geom_line(linewidth = 1) + 
+  geom_point(size = 3) + 
+  
+  expand_limits(y = 0) + 
+ 
+  labs(
+    title = "Student Burnout (Persistent Sadness) Trends: USA",
+    y = "Percent of Students (%)",
+    x = "Year"
+  ) +
+  theme_minimal() +
+  
+  # Customize the color legend title
+  scale_color_discrete(name = "Country")
+
+```
+- check the steady increase from 2019 to 2021 (COVID TIME)
+- could be because of the stress of pandemic and changes in school modality (refer to mosaic)
+
+
 ```{r}
 data <- read.csv("data/school_burnout_finland.csv")
-data <- data %>%
+data_long <- data %>%
   rename(
     High_school = colnames(data)[4]
   )
-usa_burnout <- read.csv("data/USA_burnout.csv")
-
-names(usa_burnout)[2] <- "High School"
-names(data)[4] <- "High School"
-
-merged_data_burnout <- merge(usa_burnout, data, by = "Year")
-
-names(merged_data_burnout)[2] <- 'USA'
-names(merged_data_burnout)[5] <- 'Finland'
-
-data_subset <- merged_data_burnout %>%
-  select('Year', 'USA', 'Finland')
-
 ```
 
 
@@ -362,16 +374,10 @@ data_subset <- merged_data_burnout %>%
 library(tidyverse)
 library(ggplot2)
 
-data_long <- data_subset %>%
-  pivot_longer(
-    cols = c("USA", "Finland"),
-    names_to = "Country",
-    values_to = "Percent"
-  )
 
 # 4. Create the Line Plot using ggplot2
 # Option A: Recommended Method (using expand_limits)
-ggplot(data = data_long, aes(x = Year, y = Percent, color = Country)) +
+ggplot(data = data_long, aes(x = Year, y = High_school)) +
   geom_line(linewidth = 1) + 
   geom_point(size = 3) + 
   
@@ -380,7 +386,7 @@ ggplot(data = data_long, aes(x = Year, y = Percent, color = Country)) +
   
   # Add labels and theme... (rest of the code remains the same)
   labs(
-    title = "Student Burnout (Persistent Sadness) Trends: USA vs. Finland",
+    title = "Student Burnout (Persistent Sadness) Trends: Finland",
     y = "Percent of Students (%)",
     x = "Year"
   ) +
@@ -389,14 +395,20 @@ ggplot(data = data_long, aes(x = Year, y = Percent, color = Country)) +
   # Customize the color legend title
   scale_color_discrete(name = "Country")
 ```
+The transition to distance learning during the pandemic led to decreased engagement among students, teachers, and principals.
+
+This shift significantly increased stress and burnout for educators, with principals feeling the effects of their teachers' struggles. Teachers found it difficult to compensate for the inconsistent support students received back home.
+
+The switch to distance learning was well-organized, but it ultimately made fairness in education worse and damaged the conditions needed for students to learn well and feel supported.
+
+- graph shows spike from 2019-2021
+
 
 ```{r}
 data_cynicism <- read.csv("data/cynicism_finland.csv")
 data_cynicism <- data_cynicism %>%
   rename(
-    Comprehensive = colnames(data_cynicism)[3],
     High_school = colnames(data_cynicism)[4],
-    Vocational = colnames(data_cynicism)[5]
   )
 
 # Load the necessary libraries (if not already loaded)
@@ -407,16 +419,14 @@ library(ggplot2)
 data_cynicism_long <- data_cynicism %>%
   pivot_longer(
     # Select the three school columns for pivoting
-    cols = c(Comprehensive, High_school, Vocational),
+    cols = c(High_school),
     names_to = "School_Type",
     values_to = "Percentage"
   )
 
 
 color_map <- c(
-  "Comprehensive" = "#377EB8",    # Darker Blue
-  "High_school" = "#6495ED",      # Lighter Blue/Teal
-  "Vocational" = "#800080"        # Purple/Maroon
+  "High_school" = "#6495ED"  
 )
 
 label_map <- c(
@@ -469,10 +479,124 @@ cynicism_plot <- ggplot(data_cynicism_long, aes(x = Year, y = Percentage, color 
     panel.grid.major = element_line(color = "grey80"),
     panel.grid.minor = element_blank()
   )
-
 # Display the plot
 print(cynicism_plot)
 ```
+```{r}
+pisa_gdp2018 = inner_join(read.csv("data/2018_GDP.csv"), read.csv("data/2018_PISA.csv"), by = "Country") %>%
+  select(Country, Score, GDP)
+
+library(tidyverse)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(patchwork)
+
+name_fix <- c(
+  "United States" = "United States of America",
+  "South Korea" = "Korea, Republic of",
+  "North Korea" = "Korea, Democratic People's Republic of",
+  "Iran" = "Iran, Islamic Republic of",
+  "Vietnam" = "Viet Nam",
+  "Egypt" = "Egypt, Arab Republic of",
+  "Czech Republic" = "Czechia",
+  "Syria" = "Syrian Arab Republic",
+  "Bolivia" = "Bolivia (Plurinational State of)",
+  "Brunei Darussalam" = "Brunei",
+  "Slovak Republic" = "Slovakia",
+  "Korea" = "South Korea",
+  "Baku (Azerbaijan)" = "Azerbaijan",
+  "Moldova" = "Moldova",       
+  "Kosovo" = "Kosovo")
+
+pisa_gdp2018$Country <- recode(pisa_gdp2018$Country, !!!name_fix)
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+world_data <- world %>%
+  left_join(pisa_gdp2018, by = c("name" = "Country"))
+
+map_gdp <- ggplot(world_data) +
+  geom_sf(aes(fill = GDP), color = "white", size = 0.1) +
+  scale_fill_viridis_c(option = "plasma", na.value = "gray90") +
+  labs(
+    title = "GDP by Country",
+    fill = "GDP"
+  ) +
+  theme_minimal()
+
+map_score <- ggplot(world_data) +
+  geom_sf(aes(fill = Score), color = "white", size = 0.1) +
+  scale_fill_viridis_c(option = "plasma", na.value = "gray90") +
+  labs(
+    title = "PISA Score by Country",
+    fill = "Score"
+  ) +
+  theme_minimal()
+map_gdp
+
+map_score
+
+```
+
+```{r}
+pisa_gdp2022 = inner_join(read.csv("data/2022_GDP.csv"), read.csv("data/2022_PISA.csv"), by = "Country") %>%
+  select(Country,GDP)
+
+library(tidyverse)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(patchwork)
+
+name_fix <- c(
+  "United States" = "United States of America",
+  "South Korea" = "Korea, Republic of",
+  "North Korea" = "Korea, Democratic People's Republic of",
+  "Iran" = "Iran, Islamic Republic of",
+  "Vietnam" = "Viet Nam",
+  "Egypt" = "Egypt, Arab Republic of",
+  "Czech Republic" = "Czechia",
+  "Syria" = "Syrian Arab Republic",
+  "Bolivia" = "Bolivia (Plurinational State of)",
+  "Brunei Darussalam" = "Brunei",
+  "Slovak Republic" = "Slovakia",
+  "Korea" = "South Korea",
+  "Baku (Azerbaijan)" = "Azerbaijan",
+  "Moldova" = "Moldova",       
+  "Kosovo" = "Kosovo")
+
+pisa_gdp2022$Country <- recode(pisa_gdp2022$Country, !!!name_fix)
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+world_data <- world %>%
+  left_join(pisa_gdp2018, by = c("name" = "Country"))
+
+map_gdp <- ggplot(world_data) +
+  geom_sf(aes(fill = GDP), color = "white", size = 0.1) +
+  scale_fill_viridis_c(option = "plasma", na.value = "gray90") +
+  labs(
+    title = "GDP by Country",
+    fill = "GDP"
+  ) +
+  theme_minimal()
+
+map_score <- ggplot(world_data) +
+  geom_sf(aes(fill = Score), color = "white", size = 0.1) +
+  scale_fill_viridis_c(option = "plasma", na.value = "gray90") +
+  labs(
+    title = "PISA Score by Country",
+    fill = "Score"
+  ) +
+  theme_minimal()
+map_gdp
+map_score
+```
+- create heatmap
+
+
+#- spending vs pisa 
 
 
 
