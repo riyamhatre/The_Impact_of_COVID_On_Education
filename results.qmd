@@ -89,6 +89,7 @@ all_scores_long <- bind_rows(
 ```
 
 ### global trends 
+
 - we've already introduced PISA
 - so let's look at the ridge plot 
 - we say that the data is being more bimodal over time 
