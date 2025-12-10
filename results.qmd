@@ -351,21 +351,107 @@ mosaic(
 ```{r}
 
 usaburnout <- read.csv("data/USA_burnout.csv")
-ggplot(data = usaburnout, aes(x = Year, y = High_School)) +
-  geom_line(linewidth = 1) + 
-  geom_point(size = 3) + 
+# Ensure Year is numeric
+usaburnout$Year <- as.numeric(usaburnout$Year)
+
+# --- Regression and Prediction Setup ---
+
+# 2. Prepare the training data (up to 2019)
+usaburnout_train <- subset(usaburnout, Year <= 2019)
+
+# 3. Fit the Linear Regression Model (using data up to 2019)
+burnout_model <- lm(High_School ~ Year, data = usaburnout_train)
+
+# 4. Predict the High_School value for 2021
+prediction_year <- data.frame(Year = 2021)
+predicted_value <- predict(burnout_model, newdata = prediction_year)
+
+# 5. Create data frames for plotting the actual and predicted points
+predicted_point <- data.frame(
+  Year = 2021, 
+  High_School = predicted_value,
+  Type = "Predicted"
+)
+
+# Create a data frame for all actual points, distinguishing the 2021 point
+actual_points <- usaburnout
+actual_points$Type <- "Actual (2007-2019)"
+actual_points[actual_points$Year == 2021, "Type"] <- "Actual (2021)"
+
+# --- Combined Plot Generation ---
+
+ggplot(data = actual_points, aes(x = Year, y = High_School)) +
+  
+  # A. Add the vertical shaded section (starting from 2020)
+  annotate(
+    geom = "rect",
+    xmin = 2020, 
+    xmax = 2022, # Extends past 2021 to cover the right side of the plot
+    ymin = -Inf, 
+    ymax = Inf,
+    fill = "grey", 
+    alpha = 0.3
+  ) +
+  
+  # B. Plot the regression line (fitted on 2007-2019 data)
+  geom_smooth(
+    data = usaburnout_train, # Base the line on the training data
+    method = "lm", 
+    se = FALSE, # Do not display standard error
+    color = "darkgreen", 
+    linetype = "dashed", 
+    linewidth = 1
+  ) +
+  
+  # C. Plot all actual data points
+  geom_point(aes(color = Type), size = 3) + 
+  
+  # D. Highlight the predicted 2021 point
+  geom_point(
+    data = predicted_point, 
+    aes(color = Type), 
+    size = 4, 
+    shape = 17 # Triangle shape
+  ) +
+  
+  # E. Connect the last actual point (2019) to the predicted 2021 point
+  geom_segment(
+    aes(
+      x = 2019, 
+      y = actual_points[actual_points$Year == 2019, "High_School"], 
+      xend = 2021, 
+      yend = predicted_point[predicted_point$Year == 2021, "High_School"]
+    ),
+    linetype = "dotted",
+    color = "darkgreen",
+    linewidth = 1
+  ) +
   
   expand_limits(y = 0) + 
- 
+  
   labs(
     title = "Student Burnout (Persistent Sadness) Trends: USA",
+    subtitle = paste0(
+      "Linear Prediction for 2021: ", round(predicted_value, 2), 
+      "% (Actual: ", actual_points[actual_points$Year == 2021, "High_School"], "%)"
+    ),
     y = "Percent of Students (%)",
     x = "Year"
   ) +
   theme_minimal() +
   
-  # Customize the color legend title
-  scale_color_discrete(name = "Country")
+  # F. Customize colors and legend
+  scale_color_manual(
+    name = "Data Point",
+    values = c(
+      "Actual (2007-2019)" = "black", 
+      "Actual (2021)" = "red", 
+      "Predicted" = "blue"
+    )
+  ) +
+  
+  # Move the legend to a convenient location
+  theme(legend.position = "bottom")
 # 2020 vertical line to signify the start of pandemic 
 # some kinda predictive thing to show that predicted value for 2021 is lower than actual to show hella increase in slope
 
@@ -383,30 +469,108 @@ data_long <- data %>%
 
 
 ```{r}
+# Ensure Year is numeric
+data_long$Year <- as.numeric(data_long$Year)
 
-library(tidyverse)
-library(ggplot2)
+# --- Regression and Prediction Setup ---
+# 2. Prepare the training data (up to 2019)
+data_train <- subset(data_long, Year <= 2019)
 
+# 3. Fit the Linear Regression Model
+burnout_model <- lm(High_school ~ Year, data = data_train)
 
-# 4. Create the Line Plot using ggplot2
-# Option A: Recommended Method (using expand_limits)
-ggplot(data = data_long, aes(x = Year, y = High_school)) +
-  geom_line(linewidth = 1) + 
-  geom_point(size = 3) + 
+# 4. Predict the High_school value for 2021
+prediction_year <- data.frame(Year = 2021)
+predicted_value <- predict(burnout_model, newdata = prediction_year)
+
+# 5. Create data frames for plotting the actual and predicted points
+predicted_point <- data.frame(
+  Year = 2021, 
+  High_school = predicted_value,
+  Type = "Predicted"
+)
+
+# Create a data frame for all actual points, distinguishing the 2021 point
+actual_points <- data_long
+actual_points$Type <- "Actual (2009-2019)"
+actual_points[actual_points$Year == 2021, "Type"] <- "Actual (2021)"
+
+# --- Combined Plot Generation ---
+
+ggplot(data = actual_points, aes(x = Year, y = High_school)) +
+  
+  # A. Add the vertical shaded section (starting from 2020)
+  annotate(
+    geom = "rect",
+    xmin = 2020, 
+    xmax = 2022, # Extends past 2021 to cover the right side of the plot
+    ymin = -Inf, 
+    ymax = Inf,
+    fill = "grey", 
+    alpha = 0.3
+  ) +
+  
+  # B. Plot the regression line (fitted on 2009-2019 data)
+  geom_smooth(
+    data = data_train, # Base the line on the training data
+    method = "lm", 
+    se = FALSE, # Do not display standard error
+    color = "darkgreen", 
+    linetype = "dashed", 
+    linewidth = 1
+  ) +
+  
+  # C. Plot all actual data points
+  geom_point(aes(color = Type), size = 3) + 
+  
+  # D. Highlight the predicted 2021 point
+  geom_point(
+    data = predicted_point, 
+    aes(color = Type), 
+    size = 4, 
+    shape = 17 # Triangle shape
+  ) +
+  
+  # E. Connect the last actual point (2019) to the predicted 2021 point
+  geom_segment(
+    aes(
+      x = 2019, 
+      y = actual_points[actual_points$Year == 2019, "High_school"], 
+      xend = 2021, 
+      yend = predicted_point[predicted_point$Year == 2021, "High_school"]
+    ),
+    linetype = "dotted",
+    color = "darkgreen",
+    linewidth = 1
+  ) +
   
   # 👇 This forces the y-axis to include 0
   expand_limits(y = 0) + 
   
-  # Add labels and theme... (rest of the code remains the same)
+  # Add labels and theme...
   labs(
     title = "Student Burnout (Persistent Sadness) Trends: Finland",
+    subtitle = paste0(
+      "Linear Prediction for 2021: ", round(predicted_value, 2), 
+      "% (Actual: ", actual_points[actual_points$Year == 2021, "High_school"], "%)"
+    ),
     y = "Percent of Students (%)",
     x = "Year"
   ) +
   theme_minimal() +
   
-  # Customize the color legend title
-  scale_color_discrete(name = "Country")
+  # F. Customize colors and legend
+  scale_color_manual(
+    name = "Data Point",
+    values = c(
+      "Actual (2009-2019)" = "black", 
+      "Actual (2021)" = "red", 
+      "Predicted" = "blue"
+    )
+  ) +
+  
+  # Move the legend to a convenient location
+  theme(legend.position = "bottom")
 
 # 2020 vertical line to signify the start of pandemic 
 # some kinda predictive thing to show that predicted value for 2021 is lower than actual to show hella increase in slope
@@ -560,7 +724,7 @@ map_score
 
 ```{r}
 pisa_gdp2022 = inner_join(read.csv("data/2022_GDP.csv"), read.csv("data/2022_PISA.csv"), by = "Country") %>%
-  select(Country,GDP)
+  select(Country, Score, GDP)
 
 library(tidyverse)
 library(sf)
@@ -612,8 +776,214 @@ map_score <- ggplot(world_data) +
 map_gdp
 map_score
 ```
+```{r}
+
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+ #| fig-width: 8
+ #| fig-height: 20
+
+pisa_gdp2018 <- inner_join(
+  read.csv("data/2018_GDP.csv"),
+  read.csv("data/2018_PISA.csv"),
+  by = "Country"
+) %>%
+  select(Country, Score, GDP) %>%
+  mutate(
+    Score = as.numeric(Score),
+    GDP = as.numeric(GDP)
+  )
+
+pisa_points <- pisa_gdp2018 %>%
+  filter(Country != "OECD average")
+
+oecd_avg_score <- pisa_gdp2018 %>% 
+  filter(Country == "OECD average") %>% 
+  pull(Score)
+
+mean_gdp <- pisa_points %>% 
+  summarize(mean_gdp = mean(GDP, na.rm = TRUE)) %>% 
+  pull(mean_gdp)
+
+pisa_points <- pisa_points %>%
+  mutate(
+    Above_Both = Score > oecd_avg_score & GDP > mean_gdp
+  )
+
+
+# --- Improved Plot ---
+ggplot(pisa_points, aes(x = GDP, y = Score)) +
+  
+  # Points
+  geom_point(aes(color = Above_Both), size = 3.8) +
+  
+  # Nice, readable text labels
+  geom_text_repel(
+    aes(label = Country),
+    size = 3.2,
+    box.padding = 0.5,
+    point.padding = 0.3,
+    min.segment.length = 0,
+    max.overlaps = Inf,
+    segment.alpha = 0.3
+  ) +
+  
+  # Reference lines
+  geom_hline(yintercept = oecd_avg_score, 
+             color = "red", linetype = "dashed", size = 1) +
+  geom_vline(xintercept = mean_gdp, 
+             color = "blue", linetype = "dotted", size = 1) +
+
+  # Custom colors
+  scale_color_manual(
+    values = c("FALSE" = "grey40", "TRUE" = "#1f78b4"),
+    labels = c("Other countries", "Above both thresholds"),
+    name = ""
+  ) +
+
+  # Give breathing room so text isn't cut off
+  coord_cartesian(
+    clip = "off",
+    xlim = c(min(pisa_points$GDP) * 0.95, max(pisa_points$GDP) * 1.05),
+    ylim = c(min(pisa_points$Score) * 0.97, max(pisa_points$Score) * 1.03)
+  ) +
+
+  labs(
+    title = "PISA 2022 Reading Score vs GDP per Capita",
+    subtitle = "Countries above OECD average reading score AND above mean GDP are highlighted",
+    x = "GDP per capita (USD)",
+    y = "PISA Reading Score"
+  ) +
+
+  # Much cleaner theme
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18),
+    plot.subtitle = element_text(size = 12),
+    legend.position = "bottom",
+
+    # Remove excessive gridlines
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_line(color = "grey85"),
+    panel.grid.major.x = element_line(color = "grey90"),
+
+    # Prevent clipping of labels
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
+```
+```{r}
+pisa_gdp2018
+```
+
+
+```{r}
+ #| fig-width: 8
+ #| fig-height: 12
+
+pisa_gdp2022 <- inner_join(
+  read.csv("data/2022_GDP.csv"),
+  read.csv("data/2022_PISA.csv"),
+  by = "Country"
+) %>%
+  select(Country, Reading_Mean, GDP) %>%
+  mutate(
+    Reading_Mean = as.numeric(Reading_Mean),
+    GDP = as.numeric(GDP)
+  )
+
+pisa_points <- pisa_gdp2022 %>%
+  filter(Country != "OECD average")
+
+oecd_avg_score <- pisa_gdp2022 %>% 
+  filter(Country == "OECD average") %>% 
+  pull(Reading_Mean)
+
+mean_gdp <- pisa_points %>% 
+  summarize(mean_gdp = mean(GDP, na.rm = TRUE)) %>% 
+  pull(mean_gdp)
+
+pisa_points <- pisa_points %>%
+  mutate(
+    Above_Both = Reading_Mean > oecd_avg_score & GDP > mean_gdp
+  )
+
+
+# --- Improved Plot ---
+ggplot(pisa_points, aes(x = GDP, y = Reading_Mean)) +
+  
+  # Points
+  geom_point(aes(color = Above_Both), size = 3.8) +
+  
+  # Nice, readable text labels
+  geom_text_repel(
+    aes(label = Country),
+    size = 3.2,
+    box.padding = 0.5,
+    point.padding = 0.3,
+    min.segment.length = 0,
+    max.overlaps = Inf,
+    segment.alpha = 0.3
+  ) +
+  
+  # Reference lines
+  geom_hline(yintercept = oecd_avg_score, 
+             color = "red", linetype = "dashed", size = 1) +
+  geom_vline(xintercept = mean_gdp, 
+             color = "blue", linetype = "dotted", size = 1) +
+
+  # Custom colors
+  scale_color_manual(
+    values = c("FALSE" = "grey40", "TRUE" = "#1f78b4"),
+    labels = c("Other countries", "Above both thresholds"),
+    name = ""
+  ) +
+
+  # Give breathing room so text isn't cut off
+  coord_cartesian(
+    clip = "off",
+    xlim = c(min(pisa_points$GDP) * 0.95, max(pisa_points$GDP) * 1.05),
+    ylim = c(min(pisa_points$Reading_Mean) * 0.97, max(pisa_points$Reading_Mean) * 1.03)
+  ) +
+
+  labs(
+    title = "PISA 2022 Reading Score vs GDP per Capita",
+    subtitle = "Countries above OECD average reading score AND above mean GDP are highlighted",
+    x = "GDP per capita (USD)",
+    y = "PISA Reading Score"
+  ) +
+
+  # Much cleaner theme
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18),
+    plot.subtitle = element_text(size = 12),
+    legend.position = "bottom",
+
+    # Remove excessive gridlines
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_line(color = "grey85"),
+    panel.grid.major.x = element_line(color = "grey90"),
+
+    # Prevent clipping of labels
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
+```
+
+```{r}
+pisa_gdp2022 = inner_join(read.csv("data/2022_GDP.csv"), read.csv("data/2022_PISA.csv"), by = "Country")
+pisa_gdp2022
+```
+
+
+
 - create heatmap
-- create chloropleth for the missing countries for all the PISA years 
+
 
 
 #- spending vs pisa 

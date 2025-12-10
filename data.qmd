@@ -87,9 +87,6 @@ pisa2022 <- read.csv('data/2022_PISA.csv')
 
 ```{r}
 
-# total_participated --> column with the num of times a country had PISA 
-# participation_long --> df for every country that was there for all the years 
-
 # List of country participation across years:
 participation_list <- list(
   '2009' = pisa2009$X,
@@ -142,6 +139,79 @@ ggplot(data = participation_df,
         axis.title.x = element_blank())
 ```
 
+# total_participated --> column with the num of times a country had PISA 
+# participation_long --> df for every country that was there for all the years 
+
+```{r}
+country_counts
+```
+```{r}
+library(tidyverse)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(patchwork)
+
+country_counts <- participation_long %>%
+  group_by(country) %>%
+  summarise(count_status = n(), .groups = 'drop') 
+
+name_fix <- c(
+  "United States" = "United States of America",
+  # The following must be explicitly named:
+  "Hong Kong-China" = "China", 
+  "Shanghai-China" = "China",
+  "Chinese Taipei" = "China",
+  # The rest of the vector was already correctly structured:
+  "South Korea" = "Korea, Republic of",
+  "North Korea" = "Korea, Democratic People's Republic of",
+  "Iran" = "Iran, Islamic Republic of",
+  "Vietnam" = "Viet Nam",
+  "Egypt" = "Egypt, Arab Republic of",
+  "Czech Republic" = "Czechia",
+  "Syria" = "Syrian Arab Republic",
+  "Bolivia" = "Bolivia (Plurinational State of)",
+  "Brunei Darussalam" = "Brunei",
+  "Slovak Republic" = "Slovakia",
+  "Korea" = "Korea, Republic of", 
+  "Baku (Azerbaijan)" = "Azerbaijan",
+  "Moldova" = "Republic of Moldova", 
+  "Kosovo" = "Kosovo")
+
+country_counts$country_fixed <- recode(country_counts$country, !!!name_fix, .default = country_counts$country)
+
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+world_data <- world %>%
+  left_join(country_counts, by = c("name" = "country_fixed")) %>%
+  mutate(count_status_factor = factor(count_status))
+
+
+map_pisa <- ggplot(world_data) +
+  geom_sf(aes(fill = count_status_factor), color = "white", size = 0.1) +
+  scale_fill_viridis_d(option = "plasma", 
+                       na.value = "gray90",
+                       name = "Participation Count") + 
+  labs(
+    title = "Student Participation Count by Country",
+    fill = "count_status"
+  ) +
+  theme_minimal() +
+  # Optional: Clean up map theme
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    panel.grid.major = element_line(colour = "transparent")
+  )
+
+map_pisa
+
+```
 
 
 
