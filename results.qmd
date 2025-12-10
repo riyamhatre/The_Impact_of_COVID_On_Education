@@ -359,7 +359,6 @@ ggplot(data = usaburnout, aes(x = Year, y = High_School)) +
 - check the steady increase from 2019 to 2021 (COVID TIME)
 - could be because of the stress of pandemic and changes in school modality (refer to mosaic)
 
-
 ```{r}
 data <- read.csv("data/school_burnout_finland.csv")
 data_long <- data %>%
