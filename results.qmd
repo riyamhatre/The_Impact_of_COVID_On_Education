@@ -1,5 +1,6 @@
 # Results
 #### Required Packages and Data Loading
+
 ```{r}
 # install.packages(c("dplyr","tidyr","ggplot2","ggalluvial","forcats",'ggtext'))
 library(dplyr) 
@@ -218,62 +219,69 @@ ggplot(science_scores_train, aes(year, score)) +
 - pisa vs spending
   - diff countries spend diff 
 ```{r}
-
  #| fig-width: 8
  #| fig-height: 20
+
+countries_to_label <- c(
+  "United States",
+  "Japan",
+  "Qatar",
+  "Greece",
+  "Indonesia",
+  "Germany",
+  "Australia",
+  "Romania",
+  "Finland",
+  "Singapore",
+  "Luxembourg",
+  "Cyprus",
+  "Panama")
 
 pisa_Spending2018 <- inner_join(
   read.csv("data/2018_GDP.csv"),
   read.csv("data/2018_Spending.csv"),
   by = "Country"
-) %>%
-  select(Country, Score, Spending) %>%
+) |>
+  select(Country, Score, Spending) |>
   mutate(
     Score = as.numeric(Score),
     Spending = as.numeric(Spending)
   )
 
-pisa_points <- pisa_Spending2018 %>%
+pisa_points <- pisa_Spending2018 |>
   filter(Country != "OECD average")
 
-oecd_avg_score <- pisa_Spending2018 %>% 
-  filter(Country == "OECD average") %>% 
+oecd_avg_score <- pisa_Spending2018 |>
+  filter(Country == "OECD average") |> 
   pull(Score)
 
-mean_s <- pisa_points %>% 
-  summarize(mean_s = mean(Spending, na.rm = TRUE)) %>% 
+mean_s <- pisa_points |> 
+  summarize(mean_s = mean(Spending, na.rm = TRUE)) |>
   pull(mean_s)
 
-pisa_points <- pisa_points %>%
+pisa_points <- pisa_points |>
   mutate(
-    Above_Both = Score > oecd_avg_score & Spending > mean_s
-  )
+    Above_Both = Score > oecd_avg_score & Spending > mean_s)
 
-
-# --- Improved Plot ---
 ggplot(pisa_points, aes(x = Spending, y = Score)) +
   
   # Points
-  geom_point(aes(color = Above_Both), size = 3.8) +
+  geom_point(aes(color = Above_Both), size = 2) +
   
-  # Nice, readable text labels
   geom_text_repel(
+    data = pisa_points |> filter(Country %in% countries_to_label),
     aes(label = Country),
     size = 3.2,
     box.padding = 0.5,
     point.padding = 0.3,
     min.segment.length = 0,
-    max.overlaps = Inf,
-    segment.alpha = 0.3
-  ) +
+    segment.alpha = 0.3)+
   
-  # Reference lines
   geom_hline(yintercept = oecd_avg_score, 
              color = "red", linetype = "dashed", size = 1) +
   geom_vline(xintercept = mean_s, 
              color = "blue", linetype = "dotted", size = 1) +
 
-  # Custom colors
   scale_color_manual(
     values = c("FALSE" = "grey40", "TRUE" = "#1f78b4"),
     labels = c("Other countries", "Above both thresholds"),
@@ -281,33 +289,28 @@ ggplot(pisa_points, aes(x = Spending, y = Score)) +
   ) +
   scale_x_continuous(labels = scales::comma)+
 
-  # Give breathing room so text isn't cut off
   coord_cartesian(
     clip = "off",
-    xlim = c(min(pisa_points$Spending) * 0.95, max(pisa_points$Spending) * 1.05),
+    xlim = 
+      c(min(pisa_points$Spending) * 0.95, max(pisa_points$Spending) * 1.05),
     ylim = c(min(pisa_points$Score) * 0.97, max(pisa_points$Score) * 1.03)
   ) +
 
   labs(
-    title = "PISA 2018 Reading Score vs Spending",
-    subtitle = "Countries above OECD average reading score AND above Spending are highlighted",
+    title = "PISA 2018 Reading Score vs Country Spending on Education",
     x = "Spending",
     y = "PISA Reading Score"
   ) +
 
-  # Much cleaner theme
   theme_minimal(base_size = 13) +
   theme(
     plot.title = element_text(face = "bold", size = 18),
     plot.subtitle = element_text(size = 12),
     legend.position = "bottom",
-
-    # Remove excessive gridlines
     panel.grid.minor = element_blank(),
     panel.grid.major.y = element_line(color = "grey85"),
     panel.grid.major.x = element_line(color = "grey90"),
 
-    # Prevent clipping of labels
     plot.margin = margin(20, 20, 20, 20)
   )
 
@@ -318,51 +321,61 @@ ggplot(pisa_points, aes(x = Spending, y = Score)) +
  #| fig-width: 8
  #| fig-height: 12
 
+countries_to_label <- c(
+  "United States",
+  "Japan",
+  "Qatar",
+  "Greece",
+  "Indonesia",
+  "Germany",
+  "Australia",
+  "Romania",
+  "Finland",
+  "Singapore",
+  "Luxembourg",
+  "Cyprus",
+  "Panama")
+
 pisa_Spending2022 <- inner_join(
   read.csv("data/2022_Spending.csv"),
   read.csv("data/2022_PISA.csv"),
   by = "Country"
-) %>%
-  select(Country, Reading.Mean, Spending) %>%
+) |>
+  select(Country, Reading.Mean, Spending) |>
   mutate(
     Reading.Mean = as.numeric(Reading.Mean),
     Spending = as.numeric(Spending)
   )
 
-pisa_points <- pisa_Spending2022 %>%
+pisa_points <- pisa_Spending2022 |>
   filter(Country != "OECD average")
 
-oecd_avg_score <- pisa_Spending2022 %>% 
-  filter(Country == "OECD average") %>% 
+oecd_avg_score <- pisa_Spending2022 |> 
+  filter(Country == "OECD average") |> 
   pull(Reading.Mean)
 
-mean_sp <- pisa_points %>% 
-  summarize(mean_sp = mean(Spending, na.rm = TRUE)) %>% 
+mean_sp <- pisa_points |> 
+  summarize(mean_sp = mean(Spending, na.rm = TRUE)) |> 
   pull(mean_sp)
 
-pisa_points <- pisa_points %>%
+pisa_points <- pisa_points |>
   mutate(
     Above_Both = Reading.Mean > oecd_avg_score & Spending > mean_sp
   )
 
-# --- Improved Plot ---
 ggplot(pisa_points, aes(x = Spending, y = Reading.Mean)) +
-  
-  # Points
-  geom_point(aes(color = Above_Both), size = 3.8) +
-  
-  # Nice, readable text labels
+
+  geom_point(aes(color = Above_Both), size = 2) +
   geom_text_repel(
+    data = pisa_points |> filter(Country %in% countries_to_label),
     aes(label = Country),
     size = 3.2,
     box.padding = 0.5,
     point.padding = 0.3,
     min.segment.length = 0,
-    max.overlaps = Inf,
     segment.alpha = 0.3
-  ) +
+) +
   
-  # Reference lines
   geom_hline(yintercept = oecd_avg_score, 
              color = "red", linetype = "dashed", size = 1) +
   geom_vline(xintercept = mean_sp, 
@@ -378,38 +391,34 @@ ggplot(pisa_points, aes(x = Spending, y = Reading.Mean)) +
   # Give breathing room so text isn't cut off
   coord_cartesian(
     clip = "off",
-    xlim = c(min(pisa_points$Spending) * 0.95, max(pisa_points$Spending) * 1.05),
-    ylim = c(min(pisa_points$Reading.Mean) * 0.97, max(pisa_points$Reading.Mean) * 1.03)
+    xlim = c(min(pisa_points$Spending) * 0.95, 
+             max(pisa_points$Spending) * 1.05),
+    ylim = c(min(pisa_points$Reading.Mean) * 0.97, 
+             max(pisa_points$Reading.Mean) * 1.03)
   ) +
 
   labs(
-    title = "PISA 2022 Reading Score vs Spending",
-    subtitle = "Countries above OECD average reading score AND above mean Spending",
+    title = "PISA 2022 Reading Score vs Country Spending on Education",
     x = "Spending",
     y = "PISA Reading Score"
   ) +
 
-  # Much cleaner theme
   theme_minimal(base_size = 13) +
   theme(
     plot.title = element_text(face = "bold", size = 18),
     plot.subtitle = element_text(size = 12),
     legend.position = "bottom",
-
-    # Remove excessive gridlines
     panel.grid.minor = element_blank(),
     panel.grid.major.y = element_line(color = "grey85"),
     panel.grid.major.x = element_line(color = "grey90"),
-
-    # Prevent clipping of labels
     plot.margin = margin(20, 20, 20, 20)
   )
 
 ```
 
-- graph: spendin 2018 - 2022
+- graph: spending 2018 - 2022
   - woah change or no change 
-    - change could be bc of gdp if a countru has more money they will spend more on ending 
+    - change could be bc of gdp if a country has more money they will spend more on ending 
 
 GRAPH TO BE CREATED
 
@@ -426,8 +435,20 @@ merged_data <- merge(GDP_precovid, spending_precovid, by = "Country")
 
 #2018
 
-# Define the specific countries you want to label
-target_countries <- c("Qatar", "Macao (China)", "Singapore", "Austria", "Iceland",'Finland')
+target_countries <- c(
+  "United States",
+  "Japan",
+  "Qatar",
+  "Greece",
+  "Indonesia",
+  "Germany",
+  "Australia",
+  "Romania",
+  "Finland",
+  "Singapore",
+  "Luxembourg",
+  "Cyprus",
+  "Panama")
 
 ggplot(merged_data, aes(x = GDP, y = Spending)) +
   geom_point(color = "blue", size = 2) +
@@ -445,25 +466,23 @@ ggplot(merged_data, aes(x = GDP, y = Spending)) +
     point.padding = unit(0.5, "lines"),
     force = 2
   ) +
-  
-  # Set X-axis limits and format (NO scientific notation)
+
   scale_x_continuous(
-    labels = label_number(big.mark = ","), # Format to full number with commas
-    limits = c(0, max(merged_data$GDP) * 1.05) # Incorporate the limit here
+    labels = label_number(big.mark = ","), 
+    limits = c(0, max(merged_data$GDP) * 1.05) 
   ) +
-  
-  # Set Y-axis limits and format (NO scientific notation)
+
   scale_y_continuous(
-    labels = label_number(big.mark = ","), # Format to full number with commas
-    limits = c(0, max(merged_data$Spending) * 1.05) # Incorporate the limit here
+    labels = label_number(big.mark = ","), 
+    limits = c(0, max(merged_data$Spending) * 1.05)
   ) +
   
-  # Labels and Theme
   labs(
-    title = "GDP vs. Spending Correlation (2018) - Selected Countries Highlighted",
-    x = "GDP (in currency units from table)",
+    title = "GDP Per Capita vs. Spending Correlation (2018)",
+    x = "GDP Per Capita",
     y = "Spending (in currency units from table)",
-    caption = "Linear trend line (dark red) shows relationship. Dashed line (grey) is y=x."
+    caption = "Linear trend line (dark red) shows relationship. 
+    Dashed line (grey) is y=x."
   ) +
   theme_minimal() 
 
@@ -480,9 +499,20 @@ names(merged_data2)[2] <- "GDP"
 ```
 
 ```{r}
-
-# Define the specific countries you want to label
-target_countries <- c("Qatar", "Macao (China)", "Luxembourg", "Singapore", "Austria", "Iceland", 'Finland')
+target_countries <- c(
+  "United States",
+  "Japan",
+  "Qatar",
+  "Greece",
+  "Indonesia",
+  "Germany",
+  "Australia",
+  "Romania",
+  "Finland",
+  "Singapore",
+  "Luxembourg",
+  "Cyprus",
+  "Panama")
 
 ggplot(merged_data2, aes(x = GDP, y = Spending)) +
   geom_point(color = "blue", size = 2) +
@@ -501,24 +531,23 @@ ggplot(merged_data2, aes(x = GDP, y = Spending)) +
     force = 2
   ) +
   
-  # Set X-axis limits and format (NO scientific notation)
   scale_x_continuous(
-    labels = label_number(big.mark = ","), # Format to full number with commas
-    limits = c(0, max(merged_data2$GDP) * 1.05) # Incorporate the limit here
+    labels = label_number(big.mark = ","),
+    limits = c(0, max(merged_data2$GDP) * 1.05) 
   ) +
   
-  # Set Y-axis limits and format (NO scientific notation)
   scale_y_continuous(
-    labels = label_number(big.mark = ","), # Format to full number with commas
-    limits = c(0, max(merged_data2$Spending) * 1.05) # Incorporate the limit here
+    labels = label_number(big.mark = ","),
+    limits = c(0, max(merged_data2$Spending) * 1.05) 
   ) +
   
   # Labels and Theme
   labs(
-    title = "GDP vs. Spending Correlation (2022) - Selected Countries Highlighted",
+    title = "GDP Per Capita vs. Spending Correlation (2022)",
     x = "GDP (in currency units from table)",
     y = "Spending (in currency units from table)",
-    caption = "Linear trend line (dark red) shows relationship. Dashed line (grey) is y=x."
+    caption = "Linear trend line (dark red) shows relationship. 
+    Dashed line (grey) is y=x."
   ) +
   theme_minimal() 
 
@@ -563,66 +592,73 @@ ggplot(gdp, aes(x = as.factor(year), y = gdp, group = country)) +
 Finland's transition to distance learning went well, but the effect of switching meant that students no longer had equal access to the resources provided at school and their resources were limited to their homes. Meaning, any difference or inequity of educational support in their home life directly affected their educational performance/outcomes. This can be seen in their cynicism and burnout or whatever rates increasing
 ```{r}
 data_cynicism <- read.csv("data/cynicism_finland.csv")
-data_cynicism <- data_cynicism %>%
+data_cynicism <- data_cynicism |>
   rename(
-    High_school = colnames(data_cynicism)[4],
-  )
+    High_school = colnames(data_cynicism)[4])
 
-# Convert data to long format for easier plotting
-data_cynicism_long <- data_cynicism %>%
+data_cynicism_long <- data_cynicism |>
   pivot_longer(
-    # Select the three school columns for pivoting
     cols = c(High_school),
     names_to = "School_Type",
-    values_to = "Percentage"
-  )
-
+    values_to = "Percentage")
 
 color_map <- c(
-  "High_school" = "#6495ED"  
-)
+  "High_school" = "#6495ED")
 
 label_map <- c(
-  "Comprehensive" = "Comprehensive school grades 8 and 9",
-  "High_school" = "High school grades 10 and 11",
-  "Vocational" = "Vocational school"
-)
+  "High_school" = "High school grades 10 and 11")
+# PISA IS TAKEN BY HIGH SCHOOLERS
 
-# Create the plot
-cynicism_plot <- ggplot(data_cynicism_long, aes(x = Year, y = Percentage, color = School_Type)) +
-  # Add the lines
+cynicism_plot <- ggplot(data_cynicism_long, 
+                        aes(x = Year, y = Percentage, color = School_Type)) +
+  
+  # --- SHADED REGION FROM 2020 ONWARD ---
+  geom_rect(aes(xmin = 2020, xmax = Inf, ymin = -Inf, ymax = Inf,
+                fill = "Pandemic period"),
+            inherit.aes = FALSE,
+            alpha = 0.25) +
+  
+  # --- VERTICAL LINE AT 2020 ---
+  geom_vline(aes(xintercept = 2020, linetype = "Pandemic starts"),
+             linewidth = 1) +
+  
   geom_line(linewidth = 1) +
-  # Add the points (circles)
   geom_point(size = 3) +
   
-  # Set the custom colors and labels for the legend
+  # ---- LEGENDS FOR EXTRA ELEMENTS ----
+  scale_fill_manual(
+    name = NULL,
+    values = c("Pandemic period" = "grey70")
+  ) +
+  
+  scale_linetype_manual(
+    name = NULL,
+    values = c("Pandemic starts" = "dashed")
+  ) +
+  
   scale_color_manual(
     values = color_map, 
     labels = label_map,
-    name = NULL # Remove legend title
+    name = NULL 
   ) +
   
-  # Customize the X-axis (Years)
   scale_x_continuous(
     breaks = data_cynicism$Year,
-    # Use the custom labels, noting 2013 and 2017 are single years in this set
     labels = c("2007", "2009", "2011", "2013", "2017", "2019", "2021"),
     expand = expansion(add = c(0.5, 0.5))
   ) +
   
-  # Customize the Y-axis (Percentage) - Adjusted for higher values
   scale_y_continuous(
-    limits = c(0, 40), # Set the y-axis range to accommodate up to 35.5
-    breaks = seq(0, 40, by = 5) # Set breaks every 5 units
+    limits = c(0, 40),
+    breaks = seq(0, 40, by = 5)
   ) +
   
-  # Add labels
   labs(
+    title = "Percent of Students Feeling Cynical Over the Years",
     x = "Year",
     y = "Percentage of students reporting cynicism"
   ) +
   
-  # Apply the clean theme
   theme_minimal() +
   theme(
     legend.position = "bottom",
@@ -632,8 +668,9 @@ cynicism_plot <- ggplot(data_cynicism_long, aes(x = Year, y = Percentage, color 
     panel.grid.major = element_line(color = "grey80"),
     panel.grid.minor = element_blank()
   )
-# Display the plot
+
 print(cynicism_plot)
+
 
 # 2020 vertical line to signify the start of pandemic 
 # some kinda predictive thing to show that predicted value for 2021 is lower than actual to show hella increase in slope
@@ -641,77 +678,59 @@ print(cynicism_plot)
 
 ```{r}
 data <- read.csv("data/school_burnout_finland.csv")
-data_long <- data %>%
+data_long <- data |>
   rename(
-    High_school = colnames(data)[4]
-  )
+    High_school = colnames(data)[4])
 ```
 
 
 ```{r}
-# Ensure Year is numeric
+
 data_long$Year <- as.numeric(data_long$Year)
-
-# --- Regression and Prediction Setup ---
-# 2. Prepare the training data (up to 2019)
 data_train <- subset(data_long, Year <= 2019)
-
-# 3. Fit the Linear Regression Model
 burnout_model <- lm(High_school ~ Year, data = data_train)
 
-# 4. Predict the High_school value for 2021
 prediction_year <- data.frame(Year = 2021)
 predicted_value <- predict(burnout_model, newdata = prediction_year)
 
-# 5. Create data frames for plotting the actual and predicted points
 predicted_point <- data.frame(
   Year = 2021, 
   High_school = predicted_value,
   Type = "Predicted"
 )
 
-# Create a data frame for all actual points, distinguishing the 2021 point
 actual_points <- data_long
 actual_points$Type <- "Actual (2009-2019)"
 actual_points[actual_points$Year == 2021, "Type"] <- "Actual (2021)"
 
-# --- Combined Plot Generation ---
 
 ggplot(data = actual_points, aes(x = Year, y = High_school)) +
   
-  # A. Add the vertical shaded section (starting from 2020)
   annotate(
     geom = "rect",
     xmin = 2020, 
-    xmax = 2022, # Extends past 2021 to cover the right side of the plot
+    xmax = 2022,
     ymin = -Inf, 
     ymax = Inf,
     fill = "grey", 
     alpha = 0.3
   ) +
-  
-  # B. Plot the regression line (fitted on 2009-2019 data)
+
   geom_smooth(
-    data = data_train, # Base the line on the training data
+    data = data_train,
     method = "lm", 
-    se = FALSE, # Do not display standard error
+    se = FALSE, 
     color = "darkgreen", 
     linetype = "dashed", 
     linewidth = 1
   ) +
-  
-  # C. Plot all actual data points
   geom_point(aes(color = Type), size = 3) + 
-  
-  # D. Highlight the predicted 2021 point
   geom_point(
     data = predicted_point, 
     aes(color = Type), 
     size = 4, 
-    shape = 17 # Triangle shape
+    shape = 17 
   ) +
-  
-  # E. Connect the last actual point (2019) to the predicted 2021 point
   geom_segment(
     aes(
       x = 2019, 
@@ -723,23 +742,20 @@ ggplot(data = actual_points, aes(x = Year, y = High_school)) +
     color = "darkgreen",
     linewidth = 1
   ) +
-  
-  # 👇 This forces the y-axis to include 0
   expand_limits(y = 0) + 
-  
-  # Add labels and theme...
+
   labs(
-    title = "Student Burnout (Persistent Sadness) Trends: Finland",
+    title = "Percent of Students Feeling Burntout (Hopelessness) in Finland",
     subtitle = paste0(
       "Linear Prediction for 2021: ", round(predicted_value, 2), 
-      "% (Actual: ", actual_points[actual_points$Year == 2021, "High_school"], "%)"
+      "% (Actual: ", actual_points[actual_points$Year == 2021, 
+                                   "High_school"], "%)"
     ),
     y = "Percent of Students (%)",
     x = "Year"
   ) +
   theme_minimal() +
-  
-  # F. Customize colors and legend
+
   scale_color_manual(
     name = "Data Point",
     values = c(
@@ -748,8 +764,6 @@ ggplot(data = actual_points, aes(x = Year, y = High_school)) +
       "Predicted" = "blue"
     )
   ) +
-  
-  # Move the legend to a convenient location
   theme(legend.position = "bottom")
 
 # 2020 vertical line to signify the start of pandemic 
@@ -766,11 +780,6 @@ Conclusion: The switch to distance learning was well-organized, but it ultimatel
 
 
 
-
-
-
-
-
 ### CASE STUDY: USA 
 - find a source to talk about whether the transition from diff modalities is trash and just generally how that transition went
 ```{r}
@@ -782,8 +791,7 @@ Conclusion: The switch to distance learning was well-organized, but it ultimatel
 df <- read.csv("data/school_modality.csv") |>
   mutate(
     Learning_Modality = as.factor(Learning_Modality),
-    Year = as.factor(Year)
-  )
+    Year = as.factor(Year))
 
 counts <- df |>
   group_by(Year, Learning_Modality) |>
@@ -807,70 +815,54 @@ mosaic(
 ```{r}
 # HIGH SCHOOL STUDENTS
 usaburnout <- read.csv("data/USA_burnout.csv")
-# Ensure Year is numeric
+
 usaburnout$Year <- as.numeric(usaburnout$Year)
 
-# --- Regression and Prediction Setup ---
-
-# 2. Prepare the training data (up to 2019)
 usaburnout_train <- subset(usaburnout, Year <= 2019)
 
-# 3. Fit the Linear Regression Model (using data up to 2019)
 burnout_model <- lm(High_School ~ Year, data = usaburnout_train)
 
-# 4. Predict the High_School value for 2021
 prediction_year <- data.frame(Year = 2021)
 predicted_value <- predict(burnout_model, newdata = prediction_year)
 
-# 5. Create data frames for plotting the actual and predicted points
 predicted_point <- data.frame(
   Year = 2021, 
   High_School = predicted_value,
   Type = "Predicted"
 )
 
-# Create a data frame for all actual points, distinguishing the 2021 point
 actual_points <- usaburnout
 actual_points$Type <- "Actual (2007-2019)"
 actual_points[actual_points$Year == 2021, "Type"] <- "Actual (2021)"
 
-# --- Combined Plot Generation ---
-
 ggplot(data = actual_points, aes(x = Year, y = High_School)) +
-  
-  # A. Add the vertical shaded section (starting from 2020)
   annotate(
     geom = "rect",
     xmin = 2020, 
-    xmax = 2022, # Extends past 2021 to cover the right side of the plot
+    xmax = 2022, 
     ymin = -Inf, 
     ymax = Inf,
     fill = "grey", 
     alpha = 0.3
   ) +
-  
-  # B. Plot the regression line (fitted on 2007-2019 data)
+
   geom_smooth(
-    data = usaburnout_train, # Base the line on the training data
+    data = usaburnout_train, 
     method = "lm", 
-    se = FALSE, # Do not display standard error
+    se = FALSE, 
     color = "darkgreen", 
     linetype = "dashed", 
     linewidth = 1
   ) +
-  
-  # C. Plot all actual data points
   geom_point(aes(color = Type), size = 3) + 
-  
-  # D. Highlight the predicted 2021 point
+
   geom_point(
     data = predicted_point, 
     aes(color = Type), 
     size = 4, 
-    shape = 17 # Triangle shape
+    shape = 17 
   ) +
   
-  # E. Connect the last actual point (2019) to the predicted 2021 point
   geom_segment(
     aes(
       x = 2019, 
@@ -889,14 +881,14 @@ ggplot(data = actual_points, aes(x = Year, y = High_School)) +
     title = "Student Burnout (Persistent Sadness) Trends: USA",
     subtitle = paste0(
       "Linear Prediction for 2021: ", round(predicted_value, 2), 
-      "% (Actual: ", actual_points[actual_points$Year == 2021, "High_School"], "%)"
+      "% (Actual: ", actual_points[actual_points$Year == 2021, 
+                                   "High_School"], "%)"
     ),
     y = "Percent of Students (%)",
     x = "Year"
   ) +
   theme_minimal() +
-  
-  # F. Customize colors and legend
+
   scale_color_manual(
     name = "Data Point",
     values = c(
@@ -905,8 +897,7 @@ ggplot(data = actual_points, aes(x = Year, y = High_School)) +
       "Predicted" = "blue"
     )
   ) +
-  
-  # Move the legend to a convenient location
+
   theme(legend.position = "bottom")
 # 2020 vertical line to signify the start of pandemic 
 # some kinda predictive thing to show that predicted value for 2021 is lower than actual to show hella increase in slope
@@ -914,124 +905,4 @@ ggplot(data = actual_points, aes(x = Year, y = High_School)) +
 ```
 - check the steady increase from 2019 to 2021 (COVID TIME)
 - could be because of the stress of pandemic and changes in school modality (refer to mosaic)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Chloropleth, we are not sure if we are adding/using
-
-```{r}
-pisa_gdp2018 = inner_join(read.csv("data/2018_GDP.csv"), read.csv("data/2018_PISA.csv"), by = "Country") %>%
-  select(Country, Score, GDP)
-
-name_fix <- c(
-  "United States" = "United States of America",
-  "South Korea" = "Korea, Republic of",
-  "North Korea" = "Korea, Democratic People's Republic of",
-  "Iran" = "Iran, Islamic Republic of",
-  "Vietnam" = "Viet Nam",
-  "Egypt" = "Egypt, Arab Republic of",
-  "Czech Republic" = "Czechia",
-  "Syria" = "Syrian Arab Republic",
-  "Bolivia" = "Bolivia (Plurinational State of)",
-  "Brunei Darussalam" = "Brunei",
-  "Slovak Republic" = "Slovakia",
-  "Korea" = "South Korea",
-  "Baku (Azerbaijan)" = "Azerbaijan",
-  "Moldova" = "Moldova",       
-  "Kosovo" = "Kosovo")
-
-pisa_gdp2018$Country <- recode(pisa_gdp2018$Country, !!!name_fix)
-
-world <- ne_countries(scale = "medium", returnclass = "sf")
-
-world_data <- world %>%
-  left_join(pisa_gdp2018, by = c("name" = "Country"))
-
-map_gdp <- ggplot(world_data) +
-  geom_sf(aes(fill = GDP), color = "white", size = 0.1) +
-  scale_fill_viridis_c(option = "plasma", na.value = "gray90") +
-  labs(
-    title = "GDP by Country",
-    fill = "GDP"
-  ) +
-  theme_minimal()
-
-map_score <- ggplot(world_data) +
-  geom_sf(aes(fill = Score), color = "white", size = 0.1) +
-  scale_fill_viridis_c(option = "plasma", na.value = "gray90") +
-  labs(
-    title = "PISA Score by Country",
-    fill = "Score"
-  ) +
-  theme_minimal()
-map_gdp
-
-map_score
-
-```
-
-
-```{r}
-pisa_gdp2022 = inner_join(read.csv("data/2022_GDP.csv"), read.csv("data/2022_PISA.csv"), by = "Country") %>%
-  select(Country, Reading.Mean, GDP)
-
-
-
-name_fix <- c(
-  "United States" = "United States of America",
-  "South Korea" = "Korea, Republic of",
-  "North Korea" = "Korea, Democratic People's Republic of",
-  "Iran" = "Iran, Islamic Republic of",
-  "Vietnam" = "Viet Nam",
-  "Egypt" = "Egypt, Arab Republic of",
-  "Czech Republic" = "Czechia",
-  "Syria" = "Syrian Arab Republic",
-  "Bolivia" = "Bolivia (Plurinational State of)",
-  "Brunei Darussalam" = "Brunei",
-  "Slovak Republic" = "Slovakia",
-  "Korea" = "South Korea",
-  "Baku (Azerbaijan)" = "Azerbaijan",
-  "Moldova" = "Moldova",       
-  "Kosovo" = "Kosovo")
-
-pisa_gdp2022$Country <- recode(pisa_gdp2022$Country, !!!name_fix)
-
-world <- ne_countries(scale = "medium", returnclass = "sf")
-
-world_data <- world %>%
-  left_join(pisa_gdp2022, by = c("name" = "Country"))
-
-map_gdp <- ggplot(world_data) +
-  geom_sf(aes(fill = GDP), color = "white", size = 0.1) +
-  scale_fill_viridis_c(option = "plasma", na.value = "gray90") +
-  labs(
-    title = "GDP by Country",
-    fill = "GDP"
-  ) +
-  theme_minimal()
-
-map_score <- ggplot(world_data) +
-  geom_sf(aes(fill = Reading.Mean), color = "white", size = 0.1) +
-  scale_fill_viridis_c(option = "plasma", na.value = "gray90") +
-  labs(
-    title = "PISA Score by Country",
-    fill = "Score"
-  ) +
-  theme_minimal()
-map_gdp
-#map_score
-```
-
 

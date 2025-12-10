@@ -139,8 +139,7 @@ ggplot(data = participation_df,
         axis.title.x = element_blank())
 ```
 
-# total_participated --> column with the num of times a country had PISA 
-# participation_long --> df for every country that was there for all the years 
+
 
 ```{r}
 library(tidyverse)
@@ -159,7 +158,6 @@ name_fix <- c(
   "Hong Kong-China" = "China", 
   "Shanghai-China" = "China",
   "Chinese Taipei" = "China",
-  # The rest of the vector was already correctly structured:
   "South Korea" = "Korea, Republic of",
   "North Korea" = "Korea, Democratic People's Republic of",
   "Iran" = "Iran, Islamic Republic of",
@@ -175,7 +173,9 @@ name_fix <- c(
   "Moldova" = "Republic of Moldova", 
   "Kosovo" = "Kosovo")
 
-country_counts$country_fixed <- recode(country_counts$country, !!!name_fix, .default = country_counts$country)
+country_counts$country_fixed <- recode(country_counts$country, 
+                                       !!!name_fix, .default = 
+                                         country_counts$country)
 
 
 world <- ne_countries(scale = "medium", returnclass = "sf")
@@ -189,9 +189,9 @@ map_pisa <- ggplot(world_data) +
   geom_sf(aes(fill = count_status_factor), color = "white", size = 0.1) +
   scale_fill_viridis_d(option = "plasma", 
                        na.value = "gray90",
-                       name = "Participation Count") + 
+                       name = "Number of Times") + 
   labs(
-    title = "Student Participation Count by Country",
+    title = "Number of Times a Country Took the Pisa Test",
     fill = "count_status"
   ) +
   theme_minimal() +
@@ -209,8 +209,14 @@ map_pisa <- ggplot(world_data) +
 map_pisa
 
 ```
+The most significant insight is that the massive amount of gray ("NA") data is not random, but systematic.
+Missingness largely correlates with lower-income nations (most of Africa, Central Asia, and parts of the Middle East). PISA is expensive and complex. The countries that need standardized educational assessment data the most are often the ones that cannot afford to participate.This creates a global knowledge gap, where comparative educational research is heavily biased toward the wealthier, developed world (OECD members and partners). Any "global" trend analysis drawn from this map is inherently incomplete.
 
+Countries colored deep blue (participated only once) are "partially" missing from trend analysis.A single data point provides a snapshot but fails to reveal the long-term impact of educational reforms, which requires sustained participation.
 
+The gray areas are an indicator of educational research exclusion and data inequality.
+
+There are also reports of certain countries (like India - TamilNadu Himachal Pradesh) that took the test once, and were shocked by the nation's poor performance. Therefore, they stopped participating in the tests. 
 
 
 
