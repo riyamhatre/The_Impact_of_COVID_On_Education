@@ -20,6 +20,24 @@ library(scales) # Required for label_number()
 ```
 
 ```{r}
+# Loading in the PISA datasets:
+pisa2009 <- read.csv('data/2009_PISA.csv')
+pisa2012 <- read.csv('data/2012_PISA.csv')
+pisa2015 <- read.csv('data/2015_PISA.csv')
+pisa2018 <- read.csv('data/2018_PISA.csv')
+pisa2022 <- read.csv('data/2022_PISA.csv')
+
+participation_list <- list(
+  '2009' = pisa2009$X,
+  '2012' = pisa2012$Country,
+  '2015' = pisa2015$X,
+  '2018' = pisa2018$Country,
+  '2022' = pisa2022$Country
+)
+all_countries <- unique(unlist(participation_list))
+```
+
+```{r}
 # Reading Scores Full Table
 all_reading_scores <- data.frame(country = all_countries) |>
   left_join(select(pisa2009, X, On.the.overall.reading.scale), by=c("country" = "X")) |>
