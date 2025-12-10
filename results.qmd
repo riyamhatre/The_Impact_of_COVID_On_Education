@@ -169,7 +169,7 @@ gdp_2018 <- read.csv('data/2018_GDP.csv') |>
   select("country", "score", "gdp", "year")
 gdp_2022 <- read.csv('data/2022_GDP.csv') |>
   left_join(filter(all_reading_scores_long, year == 2022), by=c("Country" = "country")) |>
-  mutate(country = Country, gdp = GDP., year="2022") |>
+  mutate(country = Country, gdp = GDP, year="2022") |>
   select("country", "score", "gdp", "year")
 
 gdp <- bind_rows(gdp_2018, gdp_2022) 
@@ -366,6 +366,8 @@ ggplot(data = usaburnout, aes(x = Year, y = High_School)) +
   
   # Customize the color legend title
   scale_color_discrete(name = "Country")
+# 2020 vertical line to signify the start of pandemic 
+# some kinda predictive thing to show that predicted value for 2021 is lower than actual to show hella increase in slope
 
 ```
 - check the steady increase from 2019 to 2021 (COVID TIME)
@@ -405,6 +407,9 @@ ggplot(data = data_long, aes(x = Year, y = High_school)) +
   
   # Customize the color legend title
   scale_color_discrete(name = "Country")
+
+# 2020 vertical line to signify the start of pandemic 
+# some kinda predictive thing to show that predicted value for 2021 is lower than actual to show hella increase in slope
 ```
 The transition to distance learning during the pandemic led to decreased engagement among students, teachers, and principals.
 
@@ -492,6 +497,9 @@ cynicism_plot <- ggplot(data_cynicism_long, aes(x = Year, y = Percentage, color 
   )
 # Display the plot
 print(cynicism_plot)
+
+# 2020 vertical line to signify the start of pandemic 
+# some kinda predictive thing to show that predicted value for 2021 is lower than actual to show hella increase in slope
 ```
 ```{r}
 pisa_gdp2018 = inner_join(read.csv("data/2018_GDP.csv"), read.csv("data/2018_PISA.csv"), by = "Country") %>%
@@ -605,6 +613,7 @@ map_gdp
 map_score
 ```
 - create heatmap
+- create chloropleth for the missing countries for all the PISA years 
 
 
 #- spending vs pisa 

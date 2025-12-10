@@ -86,6 +86,10 @@ pisa2022 <- read.csv('data/2022_PISA.csv')
 ** dont have it for a couple of years --> alluvial 
 
 ```{r}
+
+# total_participated --> column with the num of times a country had PISA 
+# participation_long --> df for every country that was there for all the years 
+
 # List of country participation across years:
 participation_list <- list(
   '2009' = pisa2009$X,
@@ -139,12 +143,6 @@ ggplot(data = participation_df,
 ```
 
 
-
-*** TASKS 
-- one person --> overarching Q
-- one person --> by country (finland and us)
-
-** statistical tests
 
 
 
