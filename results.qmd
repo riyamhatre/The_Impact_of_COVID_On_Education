@@ -59,6 +59,14 @@ ggplot(all_scores_long, aes(x = score, y = as.factor(year))) +
   ggtitle("Overall PISA Scores Over Time") +
   ylab("year")
 ```
+- change the ordering of the years axis 
+- data is being more bimodal over time 
+
+1. results.qmd 
+- we've already introduced PISA
+- so let's look at the ridge plot 
+- we say that the data is being more bimodal over time 
+- we dont knoww what is exactly changing; we can say data from higher peak is going to lower peak but we are still unsure af 
 
 
 - cleavland dot plot of all countries scores 2018 and 2022 (1)
@@ -72,10 +80,43 @@ all_scores_long |>
   ylab("") +
   theme_linedraw()
 ```
+- make a note about the three colors that are appearing 
+- we see that actually the countries whose scores differed greatly were higher performing countries; that's wack 
+- the change is getting worse 
+
+- GDP for 2018 vs 2022 (1)
+```{r}
+gdp_2018 <- read.csv('data/2018_GDP.csv') |>
+  mutate(country = Country, score = Score, gdp = GDP, year="2018") |>
+  select("country", "score", "gdp", "year")
+gdp_2022 <- read.csv('data/2022_GDP.csv') |>
+  left_join(filter(all_reading_scores_long, year == 2022), by=c("Country" = "country")) |>
+  mutate(country = Country, gdp = GDP, year="2022") |>
+  select("country", "score", "gdp", "year")
+
+gdp <- bind_rows(gdp_2018, gdp_2022) 
+# |>
+  #pivot_wider(names_from = year, values_from = gdp, names_prefix = "gdp_", values_fn = first) |>
+  #mutate(change = gdp_2022 - gdp_2018)
+
+ggplot(gdp, aes(x = as.factor(year), y = gdp, group = country)) +
+  geom_line(aes(color = country), linewidth = 1) +
+  geom_point(size = 3) +
+  labs(title = "GDP Trend: 2018 to 2022",
+       x = "Year", y = "GDP") +
+  theme(legend.position = "none") 
+```
+
+- get rid of insane colors 
+- color with red and green--> threshold of the expected slope 
+
+
+- spending for 2018 vs 2022 (1)
+---> see if there is a correlation between COVID and GDP, COVID and spending
 
 
 
-- line plot of the the average scores over time (1)
+
 
 
 ```{r}
@@ -100,8 +141,7 @@ ggplot(filter(all_science_scores_long, country == "OECD average"), aes(year, sco
 
 # Change the x axis to only show the years we wanna see
 ```
-
-- interesting to predict what 2022 would be given 2009-2018 (1) 
+- wanna see all the data 
 
 ```{r}
 # Reading Predictions
@@ -162,34 +202,227 @@ ggplot(science_scores_train, aes(year, score)) +
   ggtitle("Predicting 2022 OECD Average Science Score")
 ```
 
-- GDP for 2018 vs 2022 (1)
+- reading and math scores dropped significantly 
+- science was ok somehow
+- yes there were only three years so we cant trust this trend too much 
+- but each point was being created by the average of millions of students 
+- we have a lack of time(years) for this data but we dont have a lack of time
+
+NEXT SECTION
+- intro to this section is gonna be: we have now concluded that there is a sig dip from 2018-2022 but we can't say it's just bc of covid so lets look at some other factors 
+- pisa vs spending
+  - diff countries spend diff 
+- graph: spendin 2018 - 2022
+  - woah change or no change 
+    - change could be bc of gdp if a countru has more money they will spend more on ending 
+- GDP vs spending 
+  - there is a corr 
+- pisa vs gdp 
+  -bc gdp and spending are correlated we see the same type of corr so this prove that gdp and spending are correlated 
+  
+we end on how has GDP changed (graph: GDP 2018-2022)
+- has not increased as much as it did previously
+- GDP will typically increase but the increase that we see here is not as high as the increase that we would typically want to see - largest reason for that is covid 
+- though we can't say that COVID is the only reason why the education system has changed, a lot of the other factors that affect education outcomes were effected by covid 
+
+CASE STUDY: USA 
+- find a source to talk about whether the transition from diff modalities is 
+
+
+
 ```{r}
-gdp_2018 <- read.csv('data/2018_GDP.csv') |>
-  mutate(country = Country, score = Score, gdp = GDP, year="2018") |>
-  select("country", "score", "gdp", "year")
-gdp_2022 <- read.csv('data/2022_GDP.csv') |>
-  left_join(filter(all_reading_scores_long, year == 2022), by=c("Country" = "country")) |>
-  mutate(country = Country, gdp = GDP, year="2022") |>
-  select("country", "score", "gdp", "year")
+library(ggplot2)
+library(dplyr)
 
-gdp <- bind_rows(gdp_2018, gdp_2022) 
-# |>
-  #pivot_wider(names_from = year, values_from = gdp, names_prefix = "gdp_", values_fn = first) |>
-  #mutate(change = gdp_2022 - gdp_2018)
+ #| fig-width: 8
+ #| fig-height: 20
 
-ggplot(gdp, aes(x = as.factor(year), y = gdp, group = country)) +
-  geom_line(aes(color = country), linewidth = 1) +
-  geom_point(size = 3) +
-  labs(title = "GDP Trend: 2018 to 2022",
-       x = "Year", y = "GDP") +
-  theme(legend.position = "none") 
+pisa_Spending2018 <- inner_join(
+  read.csv("data/2018_GDP.csv"),
+  read.csv("data/2018_Spending.csv"),
+  by = "Country"
+) %>%
+  select(Country, Score, Spending) %>%
+  mutate(
+    Score = as.numeric(Score),
+    Spending = as.numeric(Spending)
+  )
+
+pisa_points <- pisa_Spending2018 %>%
+  filter(Country != "OECD average")
+
+oecd_avg_score <- pisa_Spending2018 %>% 
+  filter(Country == "OECD average") %>% 
+  pull(Score)
+
+mean_s <- pisa_points %>% 
+  summarize(mean_s = mean(Spending, na.rm = TRUE)) %>% 
+  pull(mean_s)
+
+pisa_points <- pisa_points %>%
+  mutate(
+    Above_Both = Score > oecd_avg_score & Spending > mean_s
+  )
+
+
+# --- Improved Plot ---
+ggplot(pisa_points, aes(x = Spending, y = Score)) +
+  
+  # Points
+  geom_point(aes(color = Above_Both), size = 3.8) +
+  
+  # Nice, readable text labels
+  geom_text_repel(
+    aes(label = Country),
+    size = 3.2,
+    box.padding = 0.5,
+    point.padding = 0.3,
+    min.segment.length = 0,
+    max.overlaps = Inf,
+    segment.alpha = 0.3
+  ) +
+  
+  # Reference lines
+  geom_hline(yintercept = oecd_avg_score, 
+             color = "red", linetype = "dashed", size = 1) +
+  geom_vline(xintercept = mean_s, 
+             color = "blue", linetype = "dotted", size = 1) +
+
+  # Custom colors
+  scale_color_manual(
+    values = c("FALSE" = "grey40", "TRUE" = "#1f78b4"),
+    labels = c("Other countries", "Above both thresholds"),
+    name = ""
+  ) +
+  scale_x_continuous(labels = scales::comma)+
+
+  # Give breathing room so text isn't cut off
+  coord_cartesian(
+    clip = "off",
+    xlim = c(min(pisa_points$Spending) * 0.95, max(pisa_points$Spending) * 1.05),
+    ylim = c(min(pisa_points$Score) * 0.97, max(pisa_points$Score) * 1.03)
+  ) +
+
+  labs(
+    title = "PISA 2018 Reading Score vs Spending",
+    subtitle = "Countries above OECD average reading score AND above Spending are highlighted",
+    x = "Spending",
+    y = "PISA Reading Score"
+  ) +
+
+  # Much cleaner theme
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18),
+    plot.subtitle = element_text(size = 12),
+    legend.position = "bottom",
+
+    # Remove excessive gridlines
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_line(color = "grey85"),
+    panel.grid.major.x = element_line(color = "grey90"),
+
+    # Prevent clipping of labels
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
+```
+
+```{r}
+
+ #| fig-width: 8
+ #| fig-height: 12
+
+pisa_Spending2022 <- inner_join(
+  read.csv("data/2022_Spending.csv"),
+  read.csv("data/2022_PISA.csv"),
+  by = "Country"
+) %>%
+  select(Country, Reading.Mean, Spending) %>%
+  mutate(
+    Reading.Mean = as.numeric(Reading.Mean),
+    Spending = as.numeric(Spending)
+  )
+
+pisa_points <- pisa_Spending2022 %>%
+  filter(Country != "OECD average")
+
+oecd_avg_score <- pisa_Spending2022 %>% 
+  filter(Country == "OECD average") %>% 
+  pull(Reading.Mean)
+
+mean_sp <- pisa_points %>% 
+  summarize(mean_sp = mean(Spending, na.rm = TRUE)) %>% 
+  pull(mean_sp)
+
+pisa_points <- pisa_points %>%
+  mutate(
+    Above_Both = Reading.Mean > oecd_avg_score & Spending > mean_sp
+  )
+
+# --- Improved Plot ---
+ggplot(pisa_points, aes(x = Spending, y = Reading.Mean)) +
+  
+  # Points
+  geom_point(aes(color = Above_Both), size = 3.8) +
+  
+  # Nice, readable text labels
+  geom_text_repel(
+    aes(label = Country),
+    size = 3.2,
+    box.padding = 0.5,
+    point.padding = 0.3,
+    min.segment.length = 0,
+    max.overlaps = Inf,
+    segment.alpha = 0.3
+  ) +
+  
+  # Reference lines
+  geom_hline(yintercept = oecd_avg_score, 
+             color = "red", linetype = "dashed", size = 1) +
+  geom_vline(xintercept = mean_sp, 
+             color = "blue", linetype = "dotted", size = 1) +
+
+  # Custom colors
+  scale_color_manual(
+    values = c("FALSE" = "grey40", "TRUE" = "#1f78b4"),
+    labels = c("Other countries", "Above both thresholds"),
+    name = ""
+  ) +
+
+  # Give breathing room so text isn't cut off
+  coord_cartesian(
+    clip = "off",
+    xlim = c(min(pisa_points$Spending) * 0.95, max(pisa_points$Spending) * 1.05),
+    ylim = c(min(pisa_points$Reading.Mean) * 0.97, max(pisa_points$Reading.Mean) * 1.03)
+  ) +
+
+  labs(
+    title = "PISA 2022 Reading Score vs Spending",
+    subtitle = "Countries above OECD average reading score AND above mean Spending",
+    x = "Spending",
+    y = "PISA Reading Score"
+  ) +
+
+  # Much cleaner theme
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18),
+    plot.subtitle = element_text(size = 12),
+    legend.position = "bottom",
+
+    # Remove excessive gridlines
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_line(color = "grey85"),
+    panel.grid.major.x = element_line(color = "grey90"),
+
+    # Prevent clipping of labels
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
 ```
 
 
-- spending for 2018 vs 2022 (1)
-
----> shit on countries 
----> see if there is a correlation between COVID and GDP, COVID and spending
 
 
 ```{r}
@@ -251,6 +484,7 @@ ggplot(merged_data, aes(x = GDP, y = Spending)) +
 
 # dashed is y = x
 ```
+
 ```{r}
 
 GDP_postcovid<- read.csv('data/2022_GDP.csv')
@@ -309,11 +543,13 @@ ggplot(merged_data2, aes(x = GDP, y = Spending)) +
 # dashed is y = x
 ```
 
+-- ADD AARYAS GDP AND SPENDING PLOT HERE
 
+add - spending vs pisa 
 
 #### school modality 
 - bar graph for the states (1)
-- mosaic for the modality (3 categories) (1)
+
 
 ```{r}
 
@@ -349,7 +585,7 @@ mosaic(
 - "K-12 public and independent charter school districts for the 2021-2022 school year and the Fall 2022 semester, from August 2021 – December 2022"
 
 ```{r}
-
+# HIGH SCHOOL STUDENTS
 usaburnout <- read.csv("data/USA_burnout.csv")
 # Ensure Year is numeric
 usaburnout$Year <- as.numeric(usaburnout$Year)
@@ -722,9 +958,10 @@ map_score
 
 ```
 
+
 ```{r}
 pisa_gdp2022 = inner_join(read.csv("data/2022_GDP.csv"), read.csv("data/2022_PISA.csv"), by = "Country") %>%
-  select(Country, Score, GDP)
+  select(Country, Reading.Mean, GDP)
 
 library(tidyverse)
 library(sf)
@@ -754,7 +991,7 @@ pisa_gdp2022$Country <- recode(pisa_gdp2022$Country, !!!name_fix)
 world <- ne_countries(scale = "medium", returnclass = "sf")
 
 world_data <- world %>%
-  left_join(pisa_gdp2018, by = c("name" = "Country"))
+  left_join(pisa_gdp2022, by = c("name" = "Country"))
 
 map_gdp <- ggplot(world_data) +
   geom_sf(aes(fill = GDP), color = "white", size = 0.1) +
@@ -766,7 +1003,7 @@ map_gdp <- ggplot(world_data) +
   theme_minimal()
 
 map_score <- ggplot(world_data) +
-  geom_sf(aes(fill = Score), color = "white", size = 0.1) +
+  geom_sf(aes(fill = Reading.Mean), color = "white", size = 0.1) +
   scale_fill_viridis_c(option = "plasma", na.value = "gray90") +
   labs(
     title = "PISA Score by Country",
@@ -775,201 +1012,6 @@ map_score <- ggplot(world_data) +
   theme_minimal()
 map_gdp
 map_score
-```
-```{r}
-
-```
-
-```{r}
-library(ggplot2)
-library(dplyr)
-
- #| fig-width: 8
- #| fig-height: 20
-
-pisa_Spending2018 <- inner_join(
-  read.csv("data/2018_GDP.csv"),
-  read.csv("data/2018_Spending.csv"),
-  by = "Country"
-) %>%
-  select(Country, Score, Spending) %>%
-  mutate(
-    Score = as.numeric(Score),
-    Spending = as.numeric(Spending)
-  )
-
-pisa_points <- pisa_Spending2018 %>%
-  filter(Country != "OECD average")
-
-oecd_avg_score <- pisa_Spending2018 %>% 
-  filter(Country == "OECD average") %>% 
-  pull(Score)
-
-mean_s <- pisa_points %>% 
-  summarize(mean_s = mean(Spending, na.rm = TRUE)) %>% 
-  pull(mean_s)
-
-pisa_points <- pisa_points %>%
-  mutate(
-    Above_Both = Score > oecd_avg_score & Spending > mean_s
-  )
-
-
-# --- Improved Plot ---
-ggplot(pisa_points, aes(x = Spending, y = Score)) +
-  
-  # Points
-  geom_point(aes(color = Above_Both), size = 3.8) +
-  
-  # Nice, readable text labels
-  geom_text_repel(
-    aes(label = Country),
-    size = 3.2,
-    box.padding = 0.5,
-    point.padding = 0.3,
-    min.segment.length = 0,
-    max.overlaps = Inf,
-    segment.alpha = 0.3
-  ) +
-  
-  # Reference lines
-  geom_hline(yintercept = oecd_avg_score, 
-             color = "red", linetype = "dashed", size = 1) +
-  geom_vline(xintercept = mean_s, 
-             color = "blue", linetype = "dotted", size = 1) +
-
-  # Custom colors
-  scale_color_manual(
-    values = c("FALSE" = "grey40", "TRUE" = "#1f78b4"),
-    labels = c("Other countries", "Above both thresholds"),
-    name = ""
-  ) +
-  scale_x_continuous(labels = scales::comma)+
-
-  # Give breathing room so text isn't cut off
-  coord_cartesian(
-    clip = "off",
-    xlim = c(min(pisa_points$Spending) * 0.95, max(pisa_points$Spending) * 1.05),
-    ylim = c(min(pisa_points$Score) * 0.97, max(pisa_points$Score) * 1.03)
-  ) +
-
-  labs(
-    title = "PISA 2018 Reading Score vs Spending",
-    subtitle = "Countries above OECD average reading score AND above Spending are highlighted",
-    x = "GDP per capita (USD)",
-    y = "PISA Reading Score"
-  ) +
-
-  # Much cleaner theme
-  theme_minimal(base_size = 13) +
-  theme(
-    plot.title = element_text(face = "bold", size = 18),
-    plot.subtitle = element_text(size = 12),
-    legend.position = "bottom",
-
-    # Remove excessive gridlines
-    panel.grid.minor = element_blank(),
-    panel.grid.major.y = element_line(color = "grey85"),
-    panel.grid.major.x = element_line(color = "grey90"),
-
-    # Prevent clipping of labels
-    plot.margin = margin(20, 20, 20, 20)
-  )
-
-```
-
-
-```{r}
- #| fig-width: 8
- #| fig-height: 12
-
-pisa_Spending2022 <- inner_join(
-  read.csv("data/2022_Spending.csv"),
-  read.csv("data/2022_PISA.csv"),
-  by = "Country"
-) %>%
-  select(Country, Reading_Mean, Spending) %>%
-  mutate(
-    Reading_Mean = as.numeric(Reading_Mean),
-    Spending = as.numeric(Spending)
-  )
-
-pisa_points <- pisa_Spending2022 %>%
-  filter(Country != "OECD average")
-
-oecd_avg_score <- pisa_Spending2022 %>% 
-  filter(Country == "OECD average") %>% 
-  pull(Reading_Mean)
-
-mean_sp <- pisa_points %>% 
-  summarize(mean_sp = mean(Spending, na.rm = TRUE)) %>% 
-  pull(mean_sp)
-
-pisa_points <- pisa_points %>%
-  mutate(
-    Above_Both = Reading_Mean > oecd_avg_score & Spending > mean_sp
-  )
-
-# --- Improved Plot ---
-ggplot(pisa_points, aes(x = Spending, y = Reading_Mean)) +
-  
-  # Points
-  geom_point(aes(color = Above_Both), size = 3.8) +
-  
-  # Nice, readable text labels
-  geom_text_repel(
-    aes(label = Country),
-    size = 3.2,
-    box.padding = 0.5,
-    point.padding = 0.3,
-    min.segment.length = 0,
-    max.overlaps = Inf,
-    segment.alpha = 0.3
-  ) +
-  
-  # Reference lines
-  geom_hline(yintercept = oecd_avg_score, 
-             color = "red", linetype = "dashed", size = 1) +
-  geom_vline(xintercept = mean_sp, 
-             color = "blue", linetype = "dotted", size = 1) +
-
-  # Custom colors
-  scale_color_manual(
-    values = c("FALSE" = "grey40", "TRUE" = "#1f78b4"),
-    labels = c("Other countries", "Above both thresholds"),
-    name = ""
-  ) +
-
-  # Give breathing room so text isn't cut off
-  coord_cartesian(
-    clip = "off",
-    xlim = c(min(pisa_points$Spending) * 0.95, max(pisa_points$Spending) * 1.05),
-    ylim = c(min(pisa_points$Reading_Mean) * 0.97, max(pisa_points$Reading_Mean) * 1.03)
-  ) +
-
-  labs(
-    title = "PISA 2022 Reading Score vs Spending",
-    subtitle = "Countries above OECD average reading score AND above mean Spending",
-    x = "Spending",
-    y = "PISA Reading Score"
-  ) +
-
-  # Much cleaner theme
-  theme_minimal(base_size = 13) +
-  theme(
-    plot.title = element_text(face = "bold", size = 18),
-    plot.subtitle = element_text(size = 12),
-    legend.position = "bottom",
-
-    # Remove excessive gridlines
-    panel.grid.minor = element_blank(),
-    panel.grid.major.y = element_line(color = "grey85"),
-    panel.grid.major.x = element_line(color = "grey90"),
-
-    # Prevent clipping of labels
-    plot.margin = margin(20, 20, 20, 20)
-  )
-
 ```
 
 #- spending vs pisa 

@@ -56,7 +56,7 @@ Data: https://nces.ed.gov/surveys/annualreports/topical-studies/covid/
 ## Required Packages and Data Loading
 
 ```{r}
-# install.packages(c("dplyr","tidyr","ggplot2","ggalluvial","forcats"))
+# install.packages(c("dplyr","tidyr","ggplot2","ggalluvial","forcats",'ggtext'))
 library(dplyr) 
 library(tidyr)
 library(tidyverse)
@@ -142,9 +142,6 @@ ggplot(data = participation_df,
 # total_participated --> column with the num of times a country had PISA 
 # participation_long --> df for every country that was there for all the years 
 
-```{r}
-country_counts
-```
 ```{r}
 library(tidyverse)
 library(sf)

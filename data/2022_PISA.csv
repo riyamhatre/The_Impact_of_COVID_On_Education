@@ -1,4 +1,4 @@
-Country,Reading_Mean,Mathematics Mean,Science Mean,Reading Long-term Diff,Mathematics Long-term Diff,Science Long-term Diff,Reading short-term Diff,Mathematics short-term Diff,Science short-term Diff,share of top performers,share of low performers
+Country,Reading Mean,Mathematics Mean,Science Mean,Reading Long-term Diff,Mathematics Long-term Diff,Science Long-term Diff,Reading short-term Diff,Mathematics short-term Diff,Science short-term Diff,share of top performers,share of low performers
 OECD average,472,476,485,-7,-4,-7,-15,-10,-2,13.7,16.4
 Singapore,575,543,561,6,12,12,6,-7,10,44.5,4.2
 Japan,536,516,547,2,2,4,9,12,17,28.7,5.3
@@ -7,17 +7,17 @@ Estonia,510,511,526,1,11,-3,-13,-12,-4,20,5.2
 Switzerland,508,483,503,-12,-7,-11,-7,-1,7,19.4,12.4
 Canada,497,507,515,-17,-9,-12,-15,-13,-3,22.7,8.1
 Netherlands,493,459,488,-20,-25,-23,-27,-26,-15,19,20.2
-Ireland*,492,516,504,-2,-1,-7,-8,-2,8,14.7,7.5
+Ireland,492,516,504,-2,-1,-7,-8,-2,8,14.7,7.5
 Belgium,489,479,491,-18,-11,-11,-19,-14,-8,15.5,15.2
 Denmark,489,489,494,-9,0,-3,-20,-12,1,12.8,10.3
 United Kingdom,489,494,500,-1,2,-10,-13,-10,-5,17.9,12
 Poland,489,489,499,5,5,-1,-27,-23,-12,15.3,11.9
 Austria,487,480,491,-9,-5,-14,-12,-4,1,14.6,15.5
-Australia*,487,498,507,-21,-14,-16,-4,-5,4,20.7,12.1
+Australia,487,498,507,-21,-14,-16,-4,-5,4,20.7,12.1
 Czech Republic,487,489,498,-12,1,-9,-12,-2,1,15.5,12.2
 Slovenia,485,469,500,-7,-7,-10,-24,-27,-7,13,12
 Finland,484,490,511,-34,-23,-34,-23,-30,-11,17.9,11.5
-Latvia*,483,475,494,2,3,-1,-13,-4,7,9.7,10.6
+Latvia,483,475,494,2,3,-1,-13,-4,7,9.7,10.6
 Sweden,482,487,494,-9,-11,-2,-21,-19,-6,17,15.2
 New Zealand,479,501,504,-24,-12,-18,-15,-5,-4,19.5,13.7
 Lithuania,475,472,484,-4,2,-6,-6,-4,2,10.4,14.4
@@ -76,3 +76,6 @@ Kosovo,353,366,365,m,m,m,6,4,-14,0.1,66
 Dominican Republic,342,325,336,m,m,m,-16,-3,4,0.1,75.5
 Philippines,340,353,357,m,m,m,m,m,m,0.2,71.8
 Spain,m,481,483,m,0,-1,m,-4,-10,m,m
+China,540,500,520,-3,-5,-21,-11,-25,4,29.7,7.2
+Ukraine,441,428,450,m,m,m,m,m,m,4.6,25.3
+Palestinian Authority,366,349,369,m,m,m,m,m,m,0.1,63.5
