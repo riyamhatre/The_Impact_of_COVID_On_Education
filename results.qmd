@@ -975,11 +975,6 @@ ggplot(pisa_points, aes(x = GDP, y = Reading_Mean)) +
 
 ```
 
-```{r}
-pisa_gdp2022 = inner_join(read.csv("data/2022_GDP.csv"), read.csv("data/2022_PISA.csv"), by = "Country")
-pisa_gdp2022
-```
-
 
 
 - create heatmap
