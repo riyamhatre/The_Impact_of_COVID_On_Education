@@ -90,64 +90,72 @@ all_scores_long <- bind_rows(
 ```
 
 ### global trends 
-- we've already introduced PISA
-- so let's look at the ridge plot 
-- we say that the data is being more bimodal over time 
-- we dont know what is exactly changing; we can say data from higher peak is going to lower peak but we are still unsure af 
+Let's now take a look at the PISA data:
+
 ```{r}
-ggplot(all_scores_long, aes(x = score, y = as.factor(year))) +
+ggplot(all_scores_long, aes(x = score, y = fct_reorder(as.factor(year), year, .desc = TRUE))) +
   geom_density_ridges(fill = "blue") +
   ggtitle("Overall PISA Scores Over Time") +
   ylab("year")
 ```
-- change the ordering of the years axis 
-- data is being more bimodal over time 
-
-
-
-
-- Let's look closer into these differences by country
+In 2009, the distribution is slightly bimodal, with a shallow peak around score 425 and a tall peak at score 475. Slowly, as the years go on, the peaks are getting closer in size. We cannot determine exactly what is changing but some explanations could be that: 
+- Countries from the right peak are getting worse scores and thus moving to the left peak
+- The different countries that are participating each year have different distributions of scores and so their participation/lack thereof changes the overall distribution we see
+The second explanation is less likely since we do see a trend and there is a low possibility that the participation/non-participation of countries each year created a very clear looking trend. However, let's test this out by looking at each country's individual change.
 ```{r}
 all_scores_long |>
   filter(year > 2017) |>
   filter(!is.na(score)) |>
-  ggplot(aes(x = score, y = fct_reorder2(country, year=="2022", score), color=as.factor(year))) +
+  ggplot(aes(x = score, y = fct_reorder2(country, year=="2022", score, .desc=FALSE), color=as.factor(year))) +
   geom_point(alpha=0.5) +
   ggtitle("PISA Scores in 2018 vs. 2022") +
   ylab("") +
   theme_linedraw()
 ```
-- make a note about the three colors that are appearing 
-- we see that actually the countries whose scores differed greatly were higher performing countries; that's wack 
-- the change is getting worse 
+Countries with score below 450 mostly have not greatly had their PISA scores change, as shown by the overlapping 2018 and 2019 points. The countries with scores greater than 450 all seem like their scores have changed. But specifically, the 2022 dots are mostly to the left of the 2018 dots, indicating that their scores went down. This supports the idea that higher scoring countries are getting worse scores and thus moving to the lower peak. 
 
-
-- was the decrease from 2018 to 2022 significantly worse? Let's look at the whole distribution
+We now know that at least for 2018 to 2022, the PISA scores went down, but let's check the entire trend. 
 ```{r}
 # Plotting scores
-ggplot(filter(all_reading_scores_long, country == "OECD average"), aes(year, score)) + 
-  geom_point(data = filter(all_reading_scores_long, year > 2010), aes(x=year, y=score), position='jitter') +
-  geom_point(size=4, color="red") +
+ggplot() + 
+  geom_point(data = filter(all_reading_scores_long, year > 2010), 
+             aes(x=year, y=score, color = "Individual Countries"), position='jitter') +
+  geom_point(data = filter(all_reading_scores_long, country == "OECD average"), 
+             aes(x = year, y = score, color = "OECD Average"), 
+             size = 4) +
+  scale_color_manual(values = c("Individual Countries" = "black", "OECD Average" = "red")) +
+  scale_x_continuous(breaks = c(2012, 2015, 2018, 2022)) +
   labs(x = "Year", y = "OECD Average Reading Scores") +
-  ggtitle("OECD Average Reading Scores from 2012-2022")
+  ggtitle("OECD Average Reading Scores from 2012-2022") +
+  theme_minimal()
 
-ggplot(filter(all_math_scores_long, country == "OECD average"), aes(x=year, y=score)) + 
-  geom_point(data = filter(all_math_scores_long, year > 2010), aes(x=year, y=score), position='jitter') +
-  geom_point(size=4, color="red") +
+ggplot() + 
+  geom_point(data = filter(all_math_scores_long, year > 2010), 
+             aes(x=year, y=score, color = "Individual Countries"), position='jitter') +
+  geom_point(data = filter(all_math_scores_long, country == "OECD average"), 
+             aes(x = year, y = score, color = "OECD Average"), 
+             size = 4) +
+  scale_color_manual(values = c("Individual Countries" = "black", "OECD Average" = "red")) +
+  scale_x_continuous(breaks = c(2012, 2015, 2018, 2022)) +
   labs(x = "Year", y = "OECD Average Math Scores") +
-  ggtitle("OECD Average Math Scores from 2012-2022")
+  ggtitle("OECD Average Math Scores from 2012-2022") +
+  theme_minimal()
 
-ggplot(filter(all_science_scores_long, country == "OECD average"), aes(year, score)) + 
-  geom_point(data = filter(all_science_scores_long, year > 2010), aes(x=year, y=score), position='jitter') +
-  geom_point(size=4, color="red") +
+ggplot() + 
+  geom_point(data = filter(all_science_scores_long, year > 2010), 
+             aes(x=year, y=score, color = "Individual Countries"), position='jitter') +
+  geom_point(data = filter(all_science_scores_long, country == "OECD average"), 
+             aes(x = year, y = score, color = "OECD Average"), 
+             size = 4) +
+  scale_color_manual(values = c("Individual Countries" = "black", "OECD Average" = "red")) +
+  scale_x_continuous(breaks = c(2012, 2015, 2018, 2022)) +
   labs(x = "Year", y = "OECD Average Science Scores") +
-  ggtitle("OECD Average Science Scores from 2012-2022")
+  ggtitle("OECD Average Science Scores from 2012-2022") +
+  theme_minimal()
 
 # Change the x axis to only show the years we wanna see
 ```
-
-
-- Hard to tell. Let's try to predict 2022
+Without context of previous years, we wouldn't have known that every year, all PISA scores have been dropping slowly. But this graph shows that the scores are slowly decreasing over time. However, it is a little hard to see whether the 2022 scores are far lower than the trend. Let's try to model where the average for 2022 should be with where it is.
 ```{r}
 # Reading Predictions
 reading_scores_train <- all_reading_scores_long |>
@@ -159,13 +167,21 @@ predicted_value <- predict(reading_model, newdata = data.frame(year = 2022))
 print(predicted_value)
 
 # Plot new model
-ggplot(reading_scores_train, aes(year, score)) + 
-  geom_point(data=filter(all_reading_scores_long, country == "OECD average"), aes(year, score)) +
-  geom_point(data=data.frame(year = 2022, score = predicted_value), color = "blue", size=3) +
-  geom_abline(intercept = coef(reading_model)[1], slope = coef(reading_model)[2], 
-              color = "blue", linewidth = 1) +
-  labs(x = "Year", y = "OECD Average Reading Scores") +
-  ggtitle("Predicting 2022 OECD Average Reading Score")
+ggplot() + 
+  geom_point(data = filter(all_reading_scores_long, country == "OECD average"), 
+             aes(x = year, y = score, color = "Actual Values"), 
+             size = 3) +
+  geom_point(data = data.frame(year = 2022, score = predicted_value), 
+             aes(x = year, y = score, color = "Predicted Value"), 
+             size = 3) +
+  geom_abline(aes(intercept = coef(reading_model)[1], 
+                  slope = coef(reading_model)[2], 
+                  color = "Predicted Value"), 
+              linewidth = 1) +
+  scale_color_manual(values = c("Actual Values" = "black", "Predicted Value" = "blue")) +
+  labs(x = "Year", y = "OECD Average Reading Scores", color = "") +
+  ggtitle("Predicting 2022 OECD Average Reading Score") +
+  theme_minimal()
 
 # Math Predictions
 math_scores_train <- all_math_scores_long |>
@@ -177,13 +193,21 @@ predicted_value <- predict(math_model, newdata = data.frame(year = 2022))
 print(predicted_value)
 
 # Plot new model
-ggplot(math_scores_train, aes(year, score)) + 
-  geom_point(data=filter(all_math_scores_long, country == "OECD average"), aes(year, score)) +
-  geom_point(data=data.frame(year = 2022, score = predicted_value), color = "blue", size=3) +
-  geom_abline(intercept = coef(math_model)[1], slope = coef(math_model)[2], 
-              color = "blue", linewidth = 1) +
-  labs(x = "Year", y = "OECD Average Mathematics Scores") +
-  ggtitle("Predicting 2022 OECD Average Mathematics Score")
+ggplot() + 
+  geom_point(data = filter(all_math_scores_long, country == "OECD average"), 
+             aes(x = year, y = score, color = "Actual Values"), 
+             size = 3) +
+  geom_point(data = data.frame(year = 2022, score = predicted_value), 
+             aes(x = year, y = score, color = "Predicted Value"), 
+             size = 3) +
+  geom_abline(aes(intercept = coef(math_model)[1], 
+                  slope = coef(math_model)[2], 
+                  color = "Predicted Value"), 
+              linewidth = 1) +
+  scale_color_manual(values = c("Actual Values" = "black", "Predicted Value" = "blue")) +
+  labs(x = "Year", y = "OECD Average Mathematics Scores", color = "") +
+  ggtitle("Predicting 2022 OECD Average Mathematics Score") +
+  theme_minimal()
 
 # Science Predictions
 science_scores_train <- all_science_scores_long |>
@@ -195,23 +219,28 @@ predicted_value <- predict(science_model, newdata = data.frame(year = 2022))
 print(predicted_value)
 
 # Plot new model
-ggplot(science_scores_train, aes(year, score)) + 
-  geom_point(data=filter(all_science_scores_long, country == "OECD average"), aes(year, score)) +
-  geom_point(data=data.frame(year = 2022, score = predicted_value), color = "blue", size=3) +
-  geom_abline(intercept = coef(science_model)[1], slope = coef(science_model)[2], 
-              color = "blue", linewidth = 1) +
-  labs(x = "Year", y = "OECD Average Science Scores") +
-  ggtitle("Predicting 2022 OECD Average Science Score")
+ggplot() + 
+  geom_point(data = filter(all_science_scores_long, country == "OECD average"), 
+             aes(x = year, y = score, color = "Actual Values"), 
+             size = 3) +
+  geom_point(data = data.frame(year = 2022, score = predicted_value), 
+             aes(x = year, y = score, color = "Predicted Value"), 
+             size = 3) +
+  geom_abline(aes(intercept = coef(science_model)[1], 
+                  slope = coef(science_model)[2], 
+                  color = "Predicted Value"), 
+              linewidth = 1) +
+  scale_color_manual(values = c("Actual Values" = "black", "Predicted Value" = "blue")) +
+  labs(x = "Year", y = "OECD Average Science Scores", color = "") +
+  ggtitle("Predicting 2022 OECD Average Science Score") +
+  theme_minimal()
 ```
+These graphs show where the trend for 2012-2018 is going and what the predicted value for 2022 would be with that trend, as well as where the actual value for 2022 is. For reading and math, there is a clear difference in the predicted and actual score where the actual score is much lower than expected. However, for science, the actual score was higher than expected which is interesting to note. 
 
-- reading and math scores dropped significantly 
-- science was ok somehow
-- yes there were only three years so we cant trust this trend too much 
-- but each point was being created by the average of millions of students across the world
-- we have a lack of time(years) for this data but we dont have a lack of data
-
+Given only three data points, it is difficult to conclude a significant difference for 2022, however, these data points are summarized from the millions of students around the world that took the exam. Though we do not have several years of data, the data we do have is summarizing millions of data points, which should give some assurance to the credibility of the plot. Thus, we can conclude that there was some dip in educational outcomes from 2018 to 2022.
 
 ### Other factors
+We've shown there was a dip from 2018 to 2022 and though the pandemic was the most significant thing that happened that year, it is not guaranteed to be the only 
 - intro to this section is gonna be: we have now concluded that there is a sig dip from 2018-2022 but we can't say it's just bc of covid so lets look at some other factors 
 ---> see if there is a correlation between COVID and GDP, COVID and spending
 

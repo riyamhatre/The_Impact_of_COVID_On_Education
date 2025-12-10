@@ -4,7 +4,9 @@ project:
 
 execute:
   echo: true
-
+  warning: false
+  message: false 
+  
 book:
   title: "The_Impact_of_COVID_On_Education"
   author:

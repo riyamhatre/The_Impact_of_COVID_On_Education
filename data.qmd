@@ -82,9 +82,7 @@ pisa2022 <- read.csv('data/2022_PISA.csv')
 
 
 ## Missing value analysis
-
-** dont have it for a couple of years --> alluvial 
-
+The OECD manages the PISA exam all over the world but each country must elect to participate.
 ```{r}
 
 # List of country participation across years:
