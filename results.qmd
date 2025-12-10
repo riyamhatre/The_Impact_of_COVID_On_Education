@@ -787,36 +787,36 @@ library(dplyr)
  #| fig-width: 8
  #| fig-height: 20
 
-pisa_gdp2018 <- inner_join(
+pisa_Spending2018 <- inner_join(
   read.csv("data/2018_GDP.csv"),
-  read.csv("data/2018_PISA.csv"),
+  read.csv("data/2018_Spending.csv"),
   by = "Country"
 ) %>%
-  select(Country, Score, GDP) %>%
+  select(Country, Score, Spending) %>%
   mutate(
     Score = as.numeric(Score),
-    GDP = as.numeric(GDP)
+    Spending = as.numeric(Spending)
   )
 
-pisa_points <- pisa_gdp2018 %>%
+pisa_points <- pisa_Spending2018 %>%
   filter(Country != "OECD average")
 
-oecd_avg_score <- pisa_gdp2018 %>% 
+oecd_avg_score <- pisa_Spending2018 %>% 
   filter(Country == "OECD average") %>% 
   pull(Score)
 
-mean_gdp <- pisa_points %>% 
-  summarize(mean_gdp = mean(GDP, na.rm = TRUE)) %>% 
-  pull(mean_gdp)
+mean_s <- pisa_points %>% 
+  summarize(mean_s = mean(Spending, na.rm = TRUE)) %>% 
+  pull(mean_s)
 
 pisa_points <- pisa_points %>%
   mutate(
-    Above_Both = Score > oecd_avg_score & GDP > mean_gdp
+    Above_Both = Score > oecd_avg_score & Spending > mean_s
   )
 
 
 # --- Improved Plot ---
-ggplot(pisa_points, aes(x = GDP, y = Score)) +
+ggplot(pisa_points, aes(x = Spending, y = Score)) +
   
   # Points
   geom_point(aes(color = Above_Both), size = 3.8) +
@@ -835,7 +835,7 @@ ggplot(pisa_points, aes(x = GDP, y = Score)) +
   # Reference lines
   geom_hline(yintercept = oecd_avg_score, 
              color = "red", linetype = "dashed", size = 1) +
-  geom_vline(xintercept = mean_gdp, 
+  geom_vline(xintercept = mean_s, 
              color = "blue", linetype = "dotted", size = 1) +
 
   # Custom colors
@@ -844,17 +844,18 @@ ggplot(pisa_points, aes(x = GDP, y = Score)) +
     labels = c("Other countries", "Above both thresholds"),
     name = ""
   ) +
+  scale_x_continuous(labels = scales::comma)+
 
   # Give breathing room so text isn't cut off
   coord_cartesian(
     clip = "off",
-    xlim = c(min(pisa_points$GDP) * 0.95, max(pisa_points$GDP) * 1.05),
+    xlim = c(min(pisa_points$Spending) * 0.95, max(pisa_points$Spending) * 1.05),
     ylim = c(min(pisa_points$Score) * 0.97, max(pisa_points$Score) * 1.03)
   ) +
 
   labs(
-    title = "PISA 2022 Reading Score vs GDP per Capita",
-    subtitle = "Countries above OECD average reading score AND above mean GDP are highlighted",
+    title = "PISA 2018 Reading Score vs Spending",
+    subtitle = "Countries above OECD average reading score AND above Spending are highlighted",
     x = "GDP per capita (USD)",
     y = "PISA Reading Score"
   ) +
@@ -875,9 +876,6 @@ ggplot(pisa_points, aes(x = GDP, y = Score)) +
     plot.margin = margin(20, 20, 20, 20)
   )
 
-```
-```{r}
-pisa_gdp2018
 ```
 
 
@@ -885,36 +883,35 @@ pisa_gdp2018
  #| fig-width: 8
  #| fig-height: 12
 
-pisa_gdp2022 <- inner_join(
-  read.csv("data/2022_GDP.csv"),
+pisa_Spending2022 <- inner_join(
+  read.csv("data/2022_Spending.csv"),
   read.csv("data/2022_PISA.csv"),
   by = "Country"
 ) %>%
-  select(Country, Reading_Mean, GDP) %>%
+  select(Country, Reading_Mean, Spending) %>%
   mutate(
     Reading_Mean = as.numeric(Reading_Mean),
-    GDP = as.numeric(GDP)
+    Spending = as.numeric(Spending)
   )
 
-pisa_points <- pisa_gdp2022 %>%
+pisa_points <- pisa_Spending2022 %>%
   filter(Country != "OECD average")
 
-oecd_avg_score <- pisa_gdp2022 %>% 
+oecd_avg_score <- pisa_Spending2022 %>% 
   filter(Country == "OECD average") %>% 
   pull(Reading_Mean)
 
-mean_gdp <- pisa_points %>% 
-  summarize(mean_gdp = mean(GDP, na.rm = TRUE)) %>% 
-  pull(mean_gdp)
+mean_sp <- pisa_points %>% 
+  summarize(mean_sp = mean(Spending, na.rm = TRUE)) %>% 
+  pull(mean_sp)
 
 pisa_points <- pisa_points %>%
   mutate(
-    Above_Both = Reading_Mean > oecd_avg_score & GDP > mean_gdp
+    Above_Both = Reading_Mean > oecd_avg_score & Spending > mean_sp
   )
 
-
 # --- Improved Plot ---
-ggplot(pisa_points, aes(x = GDP, y = Reading_Mean)) +
+ggplot(pisa_points, aes(x = Spending, y = Reading_Mean)) +
   
   # Points
   geom_point(aes(color = Above_Both), size = 3.8) +
@@ -933,7 +930,7 @@ ggplot(pisa_points, aes(x = GDP, y = Reading_Mean)) +
   # Reference lines
   geom_hline(yintercept = oecd_avg_score, 
              color = "red", linetype = "dashed", size = 1) +
-  geom_vline(xintercept = mean_gdp, 
+  geom_vline(xintercept = mean_sp, 
              color = "blue", linetype = "dotted", size = 1) +
 
   # Custom colors
@@ -946,14 +943,14 @@ ggplot(pisa_points, aes(x = GDP, y = Reading_Mean)) +
   # Give breathing room so text isn't cut off
   coord_cartesian(
     clip = "off",
-    xlim = c(min(pisa_points$GDP) * 0.95, max(pisa_points$GDP) * 1.05),
+    xlim = c(min(pisa_points$Spending) * 0.95, max(pisa_points$Spending) * 1.05),
     ylim = c(min(pisa_points$Reading_Mean) * 0.97, max(pisa_points$Reading_Mean) * 1.03)
   ) +
 
   labs(
-    title = "PISA 2022 Reading Score vs GDP per Capita",
-    subtitle = "Countries above OECD average reading score AND above mean GDP are highlighted",
-    x = "GDP per capita (USD)",
+    title = "PISA 2022 Reading Score vs Spending",
+    subtitle = "Countries above OECD average reading score AND above mean Spending",
+    x = "Spending",
     y = "PISA Reading Score"
   ) +
 
@@ -974,12 +971,6 @@ ggplot(pisa_points, aes(x = GDP, y = Reading_Mean)) +
   )
 
 ```
-
-
-
-- create heatmap
-
-
 
 #- spending vs pisa 
 
