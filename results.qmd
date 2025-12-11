@@ -960,6 +960,7 @@ ggplot(data = actual_points, aes(x = Year, y = High_School)) +
 
   theme(legend.position = "bottom")
 ```
+We can also observe a sharp jump in the percentage between 2019 and 2021. Prior to 2019, the year-to-year changes were relatively modest, but the increase during this period is unusually large. The model’s predicted value for 2021 is much lower than the actual data point, highlighting how substantial this rise truly is.
 
 ```{r}
 usa_pisa <- all_scores_long |>
