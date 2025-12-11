@@ -96,7 +96,10 @@ Our main research question is “Did COVID affect educational outcomes?” To an
 
 Let's now take a look at the PISA data:
 ```{r}
-ggplot(all_scores_long, aes(x = score, y = fct_reorder(as.factor(year), year, .desc = TRUE))) +
+ggplot(all_scores_long, 
+       aes(x = score, 
+           y = fct_reorder(as.factor(year), year, .desc = TRUE)
+           )) +
   geom_density_ridges(fill = "blue") +
   ggtitle("Overall PISA Scores Over Time") +
   ylab("Year") +
@@ -112,7 +115,9 @@ The second explanation is less likely since we do see a trend, and there is a lo
 all_scores_long |>
   filter(year > 2017) |>
   filter(!is.na(score)) |>
-  ggplot(aes(x = score, y = fct_reorder2(country, year=="2022", score, .desc=FALSE), color=as.factor(year))) +
+  ggplot(aes(x = score, 
+             y = fct_reorder2(country, year=="2022", score, .desc=FALSE), 
+             color=as.factor(year))) +
   geom_point(alpha=0.5, size=3) +
   ggtitle("PISA Scores in 2018 vs. 2022") +
   ylab("") +
@@ -529,7 +534,6 @@ target_countries <- c(
 
 ggplot(merged_data2, aes(x = GDP, y = Spending)) +
   geom_point(color = "blue", size = 2) +
-  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "grey50") +
   geom_smooth(method = "lm", se = FALSE, color = "darkred") +
   
   geom_text_repel(
