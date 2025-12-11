@@ -53,6 +53,12 @@ The final dataset is from the National Center for Education Statistics and it is
 
 Data: https://nces.ed.gov/surveys/annualreports/topical-studies/covid/ 
 
+Other Sources for analysis: 
+
+https://healthdata.gov/browse?q=school+learning+modalities&sortBy=relevance&pageSize=20
+https://www.aecf.org/blog/pandemic-learning-loss-impacting-young-peoples-futures#:~:text=A:%20After%20the%20shift%20to,were%20prepared%20to%20pursue%20careers.
+
+
 ## Required Packages and Data Loading
 
 ```{r}
