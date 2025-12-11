@@ -57,9 +57,14 @@ Other Sources for analysis:
 
 https://healthdata.gov/browse?q=school+learning+modalities&sortBy=relevance&pageSize=20
 https://www.aecf.org/blog/pandemic-learning-loss-impacting-young-peoples-futures#:~:text=A:%20After%20the%20shift%20to,were%20prepared%20to%20pursue%20careers.
+https://www.cdc.gov/yrbs/dstr/pdf/YRBS_Data-Summary-Trends_Report2023_508.pdf
+https://www.cdc.gov/yrbs/dstr/pdf/trendsreport.pdf
+https://www.cdc.gov/yrbs/index.html
+https://www.cdc.gov/yrbs/index.html
+https://www.cdc.gov/yrbs/index.html
 
 
-## Required Packages and Data Loading
+### Required Packages and Data Loading
 
 ```{r}
 # install.packages(c("dplyr","tidyr","ggplot2","ggalluvial","forcats",'ggtext'))

@@ -177,11 +177,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#description" id="toc-description" class="nav-link active" data-scroll-target="#description"><span class="header-section-number">2.1</span> Description</a></li>
-  <li><a href="#required-packages-and-data-loading" id="toc-required-packages-and-data-loading" class="nav-link" data-scroll-target="#required-packages-and-data-loading"><span class="header-section-number">2.2</span> Required Packages and Data Loading</a></li>
-  <li><a href="#missing-value-analysis" id="toc-missing-value-analysis" class="nav-link" data-scroll-target="#missing-value-analysis"><span class="header-section-number">2.3</span> Missing value analysis</a>
+  <li><a href="#description" id="toc-description" class="nav-link active" data-scroll-target="#description"><span class="header-section-number">2.1</span> Description</a>
   <ul class="collapse">
-  <li><a href="#lack-of-nans" id="toc-lack-of-nans" class="nav-link" data-scroll-target="#lack-of-nans"><span class="header-section-number">2.3.1</span> Lack of NANs</a></li>
+  <li><a href="#required-packages-and-data-loading" id="toc-required-packages-and-data-loading" class="nav-link" data-scroll-target="#required-packages-and-data-loading"><span class="header-section-number">2.1.1</span> Required Packages and Data Loading</a></li>
+  </ul></li>
+  <li><a href="#missing-value-analysis" id="toc-missing-value-analysis" class="nav-link" data-scroll-target="#missing-value-analysis"><span class="header-section-number">2.2</span> Missing value analysis</a>
+  <ul class="collapse">
+  <li><a href="#lack-of-nans" id="toc-lack-of-nans" class="nav-link" data-scroll-target="#lack-of-nans"><span class="header-section-number">2.2.1</span> Lack of NANs</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/riyamhatre/The_Impact_of_COVID_On_Education/edit/main/data.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/riyamhatre/The_Impact_of_COVID_On_Education/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -237,10 +239,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The final dataset is from the National Center for Education Statistics and it is data regarding the U.S. education at the time of COVID. There’s a variety of data regarding the activities of people during this time, such as the number of adults with children who had their students attending summer programs or working with private tutors. We hope to use this data to gain more data about the ways students and parents coped with the changes in education during this turbulent time.</p>
 <p>Data: https://nces.ed.gov/surveys/annualreports/topical-studies/covid/</p>
 <p>Other Sources for analysis:</p>
-<p>https://healthdata.gov/browse?q=school+learning+modalities&amp;sortBy=relevance&amp;pageSize=20 https://www.aecf.org/blog/pandemic-learning-loss-impacting-young-peoples-futures#:~:text=A:%20After%20the%20shift%20to,were%20prepared%20to%20pursue%20careers.</p>
-</section>
-<section id="required-packages-and-data-loading" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="required-packages-and-data-loading"><span class="header-section-number">2.2</span> Required Packages and Data Loading</h2>
+<p>https://healthdata.gov/browse?q=school+learning+modalities&amp;sortBy=relevance&amp;pageSize=20 https://www.aecf.org/blog/pandemic-learning-loss-impacting-young-peoples-futures#:~:text=A:%20After%20the%20shift%20to,were%20prepared%20to%20pursue%20careers. https://www.cdc.gov/yrbs/dstr/pdf/YRBS_Data-Summary-Trends_Report2023_508.pdf https://www.cdc.gov/yrbs/dstr/pdf/trendsreport.pdf https://www.cdc.gov/yrbs/index.html https://www.cdc.gov/yrbs/index.html https://www.cdc.gov/yrbs/index.html</p>
+<section id="required-packages-and-data-loading" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="required-packages-and-data-loading"><span class="header-section-number">2.1.1</span> Required Packages and Data Loading</h3>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -302,8 +303,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-<section id="missing-value-analysis" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="missing-value-analysis"><span class="header-section-number">2.3</span> Missing value analysis</h2>
+</section>
+<section id="missing-value-analysis" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="missing-value-analysis"><span class="header-section-number">2.2</span> Missing value analysis</h2>
 <p>The OECD manages the PISA exam all over the world, but each country must elect to participate. For a plethora of reasons, countries might not elect to participate, so not all countries participate in every PISA test. In order to model that, we created an alluvial plot to see how many countries participate and in which tests.</p>
 <div class="cell">
 <details class="code-fold">
@@ -411,8 +413,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The most significant insight is that the massive amount of gray (“NA”) data is not random, but systematic. Missingness largely correlates with lower-income nations (most of Africa, Central Asia, and parts of the Middle East). PISA is expensive and complex. The countries that need standardized educational assessment data the most are often the ones that cannot afford to participate. This creates a global knowledge gap, where comparative educational research is heavily biased toward the wealthier, developed world (OECD members and partners). Any “global” trend analysis drawn from this map is inherently incomplete.</p>
 <p>Countries colored deep blue (participated only once) are “partially” missing from the trend analysis. A single data point provides a snapshot but fails to reveal the long-term impact of educational reforms, which requires sustained participation. The gray areas indicate educational research exclusion and data inequality.</p>
 <p>There are also reports of certain countries (like India - Tamil Nadu, Himachal Pradesh) that took the test once and were shocked by the nation’s poor performance. Therefore, they stopped participating in the tests.</p>
-<section id="lack-of-nans" class="level3" data-number="2.3.1">
-<h3 data-number="2.3.1" class="anchored" data-anchor-id="lack-of-nans"><span class="header-section-number">2.3.1</span> Lack of NANs</h3>
+<section id="lack-of-nans" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="lack-of-nans"><span class="header-section-number">2.2.1</span> Lack of NANs</h3>
 <p>Fortunately, this dataset was relatively clean and required minimal pre-processing. This is probably because there is a specific focus on a single statistic, PISA scores across multiple years. The structured nature of the PISA data means that the presence or absence of a value in one column is independent of values in other columns, eliminating complex dependency issues (the absence of a test score doesn’t indicate the absence of a demographic variable).</p>
 
 

@@ -92,7 +92,7 @@ all_scores_long <- bind_rows(
 Our main research question is “Did COVID affect educational outcomes?” To answer this, we utilized the PISA scores from 2012 to 2022. The PISA is a standardized test developed by the OECD for high schoolers to compare educational outcomes across the world. To effectively examine the pandemic’s effect on education, we employed the funnel method, which involves examining high-level trends in the data. From there, we began to notice patterns, ask more questions, and gather additional data to further investigate our primary mission.
 
 
-### Global Educational Trends
+## Global Educational Trends
 
 Let's now take a look at the PISA data:
 ```{r}
@@ -106,6 +106,7 @@ ggplot(all_scores_long,
   xlab("Score")
 ```
 In 2009, the distribution is slightly bimodal, with a shallow peak centered at score = 425 and a taller peak at score = 475. As the years pass, the peaks are slowly becoming closer in size. We cannot determine exactly what is changing, but some explanations could be that: 
+
 - Countries from the “right peak” are getting worse scores, thus becoming a part of the left peak 
 - The different countries that are participating each year have different distributions of scores, and so their participation/lack thereof changes the overall distribution we see
 
@@ -370,18 +371,17 @@ ggplot(pisa_points_2018, aes(x = Spending, y = Score)) +
     name = ""
   ) +
   
-  # FIX: Apply scales::comma to remove scientific notation (e)
-  scale_x_continuous(labels = scales::comma)+ 
+  scale_x_continuous(labels = scales::comma) + 
 
-  # Use the common xlim
   coord_cartesian(
     clip = "off",
     xlim = common_xlim, 
-    ylim = c(min(pisa_points_2018$Score) * 0.97, max(pisa_points_2018$Score) * 1.03)
+    ylim = c(min(pisa_points_2018$Score) * 0.97,
+             max(pisa_points_2018$Score) * 1.03)
   ) +
 
   labs(
-    title = "PISA 2018 Reading Score vs Country Spending on Education",
+    title = "PISA 2018 Reading Score vs Spending",
     x = "Spending",
     y = "PISA Reading Score"
   ) +
@@ -436,7 +436,7 @@ ggplot(pisa_points_2022, aes(x = Spending, y = Reading.Mean)) +
   ) +
 
   labs(
-    title = "PISA 2022 Reading Score vs Country Spending on Education",
+    title = "PISA 2022 Reading Score vs Spending",
     x = "Spending",
     y = "PISA Reading Score"
   ) +
@@ -477,7 +477,6 @@ target_countries <- c(
 
 ggplot(merged_data, aes(x = GDP, y = Spending)) +
   geom_point(color = "blue", size = 2) +
-  # geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "grey50") +
   geom_smooth(method = "lm", se = FALSE, color = "darkred") +
   
   geom_text_repel(
@@ -684,8 +683,8 @@ Some specifics: We can see that from 2018-2022, Singapore’s GDP per capita and
 
 We found that educational spending and GDP per capita are also factors in PISA outcomes. Educational spending also depends heavily on GDP, and we know GDP took a dip during the pandemic. Thus, several typical factors for educational outcomes were also affected by the pandemic. We cannot guarantee the pandemic is the sole cause of the educational dip from 2018 to 2022, but several other factors to educational outcomes were also affected by the pandemic, indicating that the pandemic likely had the largest effect.
 
-
-### CASE STUDY: FINLAND
+## Case Studies:
+### Finland
 Finland’s transition to distance learning went well, but the switch meant that students no longer had equal access to the resources provided at school, and their resources became limited by their homes. In other words, any difference or inequity of educational support in their home life directly affected their educational performance/outcomes.
 ```{r}
 data_cynicism <- read.csv("data/cynicism_finland.csv")
@@ -877,7 +876,7 @@ The transition to distance learning during the pandemic led to decreased engagem
 Conclusion: The switch to distance learning was well-organized, but it ultimately worsened fairness in education and removed the conditions students needed to learn and feel supported.
 
 
-### CASE STUDY: USA 
+### USA 
 ```{r}
 
 df <- read.csv("data/school_modality.csv") |>
