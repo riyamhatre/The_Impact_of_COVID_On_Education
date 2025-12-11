@@ -1,6 +1,11 @@
 # Results
 #### Required Packages and Data Loading
 
+### Background
+
+The main thing we are investigating is whether or not COVID affected the PISA scores (a test taken by high school students) of students. To effectively check whether it was indeed COVID that affected the PISA scores, or some other factors, we approached this using the funnel method, where we looked at the high level trends in the data. From there, we started noticing patterns, asking more questions, and gathering more data to further investigate our main mission. 
+
+
 ```{r}
 # install.packages(c("dplyr","tidyr","ggplot2","ggalluvial","forcats",'ggtext'))
 library(dplyr) 
@@ -90,6 +95,7 @@ all_scores_long <- bind_rows(
 ```
 
 ### global trends 
+
 Let's now take a look at the PISA data:
 
 ```{r}
@@ -99,10 +105,11 @@ ggplot(all_scores_long, aes(x = score, y = fct_reorder(as.factor(year), year, .d
   ylab("year")
 ```
 In 2009, the distribution is slightly bimodal, with a shallow peak around score 425 and a tall peak at score 475. Slowly, as the years go on, the peaks are getting closer in size. We cannot determine exactly what is changing but some explanations could be that: 
-- Countries from the right peak are getting worse scores and thus moving to the left peak
+- Countries from the "right peak" are getting worse scores, thus becoming a part of the left peak
 - The different countries that are participating each year have different distributions of scores and so their participation/lack thereof changes the overall distribution we see
+
 The second explanation is less likely since we do see a trend and there is a low possibility that the participation/non-participation of countries each year created a very clear looking trend. However, let's test this out by looking at each country's individual change.
-```{r}
+```{r, fig.height=10, fig.width=12}
 all_scores_long |>
   filter(year > 2017) |>
   filter(!is.na(score)) |>
@@ -110,7 +117,8 @@ all_scores_long |>
   geom_point(alpha=0.5) +
   ggtitle("PISA Scores in 2018 vs. 2022") +
   ylab("") +
-  theme_linedraw()
+  theme_linedraw() + 
+  labs(color = "Year")
 ```
 Countries with score below 450 mostly have not greatly had their PISA scores change, as shown by the overlapping 2018 and 2019 points. The countries with scores greater than 450 all seem like their scores have changed. But specifically, the 2022 dots are mostly to the left of the 2018 dots, indicating that their scores went down. This supports the idea that higher scoring countries are getting worse scores and thus moving to the lower peak. 
 
@@ -119,11 +127,13 @@ We now know that at least for 2018 to 2022, the PISA scores went down, but let's
 # Plotting scores
 ggplot() + 
   geom_point(data = filter(all_reading_scores_long, year > 2010), 
-             aes(x=year, y=score, color = "Individual Countries"), position='jitter') +
+             aes(x=year, y=score, color = "Individual Countries"), 
+             position='jitter') +
   geom_point(data = filter(all_reading_scores_long, country == "OECD average"), 
              aes(x = year, y = score, color = "OECD Average"), 
              size = 4) +
-  scale_color_manual(values = c("Individual Countries" = "black", "OECD Average" = "red")) +
+  scale_color_manual(values = c("Individual Countries" = "black", 
+                                "OECD Average" = "red")) +
   scale_x_continuous(breaks = c(2012, 2015, 2018, 2022)) +
   labs(x = "Year", y = "OECD Average Reading Scores") +
   ggtitle("OECD Average Reading Scores from 2012-2022") +
@@ -131,11 +141,13 @@ ggplot() +
 
 ggplot() + 
   geom_point(data = filter(all_math_scores_long, year > 2010), 
-             aes(x=year, y=score, color = "Individual Countries"), position='jitter') +
+             aes(x=year, y=score, color = "Individual Countries"), 
+             position='jitter') +
   geom_point(data = filter(all_math_scores_long, country == "OECD average"), 
              aes(x = year, y = score, color = "OECD Average"), 
              size = 4) +
-  scale_color_manual(values = c("Individual Countries" = "black", "OECD Average" = "red")) +
+  scale_color_manual(values = c("Individual Countries" = "black", 
+                                "OECD Average" = "red")) +
   scale_x_continuous(breaks = c(2012, 2015, 2018, 2022)) +
   labs(x = "Year", y = "OECD Average Math Scores") +
   ggtitle("OECD Average Math Scores from 2012-2022") +
@@ -143,11 +155,13 @@ ggplot() +
 
 ggplot() + 
   geom_point(data = filter(all_science_scores_long, year > 2010), 
-             aes(x=year, y=score, color = "Individual Countries"), position='jitter') +
+             aes(x=year, y=score, color = "Individual Countries"), 
+             position='jitter') +
   geom_point(data = filter(all_science_scores_long, country == "OECD average"), 
              aes(x = year, y = score, color = "OECD Average"), 
              size = 4) +
-  scale_color_manual(values = c("Individual Countries" = "black", "OECD Average" = "red")) +
+  scale_color_manual(values = c("Individual Countries" = "black", 
+                                "OECD Average" = "red")) +
   scale_x_continuous(breaks = c(2012, 2015, 2018, 2022)) +
   labs(x = "Year", y = "OECD Average Science Scores") +
   ggtitle("OECD Average Science Scores from 2012-2022") +
@@ -156,6 +170,10 @@ ggplot() +
 # Change the x axis to only show the years we wanna see
 ```
 Without context of previous years, we wouldn't have known that every year, all PISA scores have been dropping slowly. But this graph shows that the scores are slowly decreasing over time. However, it is a little hard to see whether the 2022 scores are far lower than the trend. Let's try to model where the average for 2022 should be with where it is.
+
+The OECD Average _______
+
+
 ```{r}
 # Reading Predictions
 reading_scores_train <- all_reading_scores_long |>
@@ -178,12 +196,12 @@ ggplot() +
                   slope = coef(reading_model)[2], 
                   color = "Predicted Value"), 
               linewidth = 1) +
-  scale_color_manual(values = c("Actual Values" = "black", "Predicted Value" = "blue")) +
+  scale_color_manual(values = c("Actual Values" = "black", 
+                                "Predicted Value" = "blue")) +
   labs(x = "Year", y = "OECD Average Reading Scores", color = "") +
   ggtitle("Predicting 2022 OECD Average Reading Score") +
   theme_minimal()
 
-# Math Predictions
 math_scores_train <- all_math_scores_long |>
   filter(year < 2020, country == "OECD average")
 math_model <- lm(score ~ year, data = math_scores_train)
@@ -204,7 +222,8 @@ ggplot() +
                   slope = coef(math_model)[2], 
                   color = "Predicted Value"), 
               linewidth = 1) +
-  scale_color_manual(values = c("Actual Values" = "black", "Predicted Value" = "blue")) +
+  scale_color_manual(values = c("Actual Values" = "black", 
+                                "Predicted Value" = "blue")) +
   labs(x = "Year", y = "OECD Average Mathematics Scores", color = "") +
   ggtitle("Predicting 2022 OECD Average Mathematics Score") +
   theme_minimal()
@@ -230,14 +249,20 @@ ggplot() +
                   slope = coef(science_model)[2], 
                   color = "Predicted Value"), 
               linewidth = 1) +
-  scale_color_manual(values = c("Actual Values" = "black", "Predicted Value" = "blue")) +
+  scale_color_manual(values = c("Actual Values" = "black", 
+                                "Predicted Value" = "blue")) +
   labs(x = "Year", y = "OECD Average Science Scores", color = "") +
   ggtitle("Predicting 2022 OECD Average Science Score") +
   theme_minimal()
 ```
 These graphs show where the trend for 2012-2018 is going and what the predicted value for 2022 would be with that trend, as well as where the actual value for 2022 is. For reading and math, there is a clear difference in the predicted and actual score where the actual score is much lower than expected. However, for science, the actual score was higher than expected which is interesting to note. 
 
-Given only three data points, it is difficult to conclude a significant difference for 2022, however, these data points are summarized from the millions of students around the world that took the exam. Though we do not have several years of data, the data we do have is summarizing millions of data points, which should give some assurance to the credibility of the plot. Thus, we can conclude that there was some dip in educational outcomes from 2018 to 2022.
+Given only three data points, it is difficult to conclude a significant difference for 2022, however, these data points are summarized from the millions of students around the world that took the exam. Though we do not have several years of data, the data we do have is summarizing millions of data points, which should give some assurance to the credibility of the plot. 
+
+The "models" that were created aren't necessarily made to predict values accurately; they serve as a visual representation of how large of a jump in scores there are from before the pandemic to after.
+
+Based on these graphs, we can conclude that there was some dip in educational outcomes from 2018 to 2022.
+
 
 ### Other factors
 We've shown there was a dip from 2018 to 2022 and though the pandemic was the most significant thing that happened that year, it is not guaranteed to be the only 
@@ -456,7 +481,6 @@ GRAPH TO BE CREATED
 ```{r}
 GDP_precovid<- read.csv('data/2018_GDP.csv')
 spending_precovid<- read.csv('data/2018_Spending.csv')
-
 merged_data <- merge(GDP_precovid, spending_precovid, by = "Country")
 ```
 
@@ -618,7 +642,7 @@ ggplot(gdp, aes(x = as.factor(year), y = gdp, group = country)) +
 
 
 ### CASE STUDY: FINLAND
-Finland's transition to distance learning went well, but the effect of switching meant that students no longer had equal access to the resources provided at school and their resources were limited to their homes. Meaning, any difference or inequity of educational support in their home life directly affected their educational performance/outcomes. This can be seen in their cynicism and burnout or whatever rates increasing
+Finland's transition to distance learning went well, but the effect of switching meant that students no longer had equal access to the resources provided at school and their resources were limited to their homes. Meaning, any difference or inequity of educational support in their home life directly affected their educational performance/outcomes. 
 ```{r}
 data_cynicism <- read.csv("data/cynicism_finland.csv")
 data_cynicism <- data_cynicism |>
@@ -636,12 +660,9 @@ color_map <- c(
 
 label_map <- c(
   "High_school" = "High school grades 10 and 11")
-# PISA IS TAKEN BY HIGH SCHOOLERS
 
 cynicism_plot <- ggplot(data_cynicism_long, 
                         aes(x = Year, y = Percentage, color = School_Type)) +
-  
-  # --- SHADED REGION FROM 2020 ONWARD ---
   geom_rect(aes(xmin = 2020, xmax = Inf, ymin = -Inf, ymax = Inf,
                 fill = "Pandemic period"),
             inherit.aes = FALSE,
@@ -699,21 +720,15 @@ cynicism_plot <- ggplot(data_cynicism_long,
   )
 
 print(cynicism_plot)
-
-
-# 2020 vertical line to signify the start of pandemic 
-# some kinda predictive thing to show that predicted value for 2021 is lower than actual to show hella increase in slope
 ```
+
+As seen in the graph above, in the years before the pandemic, the percent of students reporting cynicism is fairly stable. If you take a look at 2019, the year before the pandemic, to 2021, (with 2020 being the beginning of the pandemic) there is a sharp increase in the graph. Just visually you can see that stark increase. We could hypothesize that the reasoning for this was the increased strain on students during COVID. 
 
 ```{r}
 data <- read.csv("data/school_burnout_finland.csv")
 data_long <- data |>
   rename(
     High_school = colnames(data)[4])
-```
-
-
-```{r}
 
 data_long$Year <- as.numeric(data_long$Year)
 data_train <- subset(data_long, Year <= 2019)
@@ -798,15 +813,31 @@ ggplot(data = actual_points, aes(x = Year, y = High_school)) +
 # 2020 vertical line to signify the start of pandemic 
 # some kinda predictive thing to show that predicted value for 2021 is lower than actual to show hella increase in slope
 ```
-- graph shows spike from 2019-2021
+In addition, we can see here that there is a sharp percentage increase from 2019-2021. Visually, we can see that there percentage value change over the years before 2019 were not extremely drastic. However, the change from 2019-2021 is quite dramatic. We can see that based on the trend, the predicted value for 2021 is significantly lower than the actual value, meaning that the increase is significant. 
 
+```{r}
+finland_pisa <- all_scores_long |>
+  filter(country == "Finland", subject == 'reading')
 
-The transition to distance learning during the pandemic led to decreased engagement among students, teachers, and principals. This shift significantly increased stress and burnout for educators, with principals feeling the effects of their teachers' struggles. Teachers found it difficult to compensate for the inconsistent support students received back home. As seen in this teacher burnout graph:
-GRAPH OF TEACHER BURNOUT TO BE CREATED
+ggplot(finland_pisa, aes(x = year, y = score)) +
+  geom_line(color = "blue", linewidth = 1) +  # Adds the line, set color and thickness
+  geom_point(color = "darkblue", size = 3) + # Adds the points for each data year
+  scale_x_continuous(breaks = finland_pisa$year) + # Ensures every year has a label on the x-axis
+  labs(
+    title = "Finland's PISA Reading Scores Over Time",
+    x = "Year",
+    y = "PISA Reading Score"
+  ) +
+  theme_minimal()
+```
 
+As you can see in the graph above, there is a sharp drop in scores from 2018-2022 for Finland. It aligns with the graphs above that plotted the pisa scores for all countries together, in the sense that there is a sharp drop from 2018-2022. Going back to the cynicism and burnout plots, we could state that because of the pandemic, students were feeling very cynical about their lives and burnout by the strain that came from surviving a global pandemic. 
+
+The transition to distance learning during the pandemic led to decreased engagement among students, teachers, and principals. This shift significantly increased stress and burnout for educators, with principals feeling the effects of their teachers' struggles. Teachers found it difficult to compensate for the inconsistent support students received back home.
+
+Students are not getting the support that they need. TABLE SPENDING TREND 2018-2022 
 
 Conclusion: The switch to distance learning was well-organized, but it ultimately made fairness in education worse and damaged the conditions needed for students to learn well and feel supported.
-
 
 
 ### CASE STUDY: USA 
@@ -816,6 +847,7 @@ Conclusion: The switch to distance learning was well-organized, but it ultimatel
 #### school modality 
 
 #https://healthdata.gov/browse?q=school+learning+modalities&sortBy=relevance&pageSize=20
+#https://www.aecf.org/blog/pandemic-learning-loss-impacting-young-peoples-futures#:~:text=A:%20After%20the%20shift%20to,were%20prepared%20to%20pursue%20careers.
 
 df <- read.csv("data/school_modality.csv") |>
   mutate(
@@ -837,12 +869,11 @@ mosaic(
   highlighting_fill = colors_theme,
   main = "Learning Modality by Year")
 ```
-- from 2020 to 2022, the USA changed learning modality due to pandemic
-- by the end of 2022, schools were back to hybrid
-- "K-12 public and independent charter school districts for the 2021-2022 school year and the Fall 2022 semester, from August 2021 – December 2022"
+
+To create this mosaic plot, we used "K-12 public and independent charter school districts for the 2021-2022 school year and the Fall 2022 semester, from August 2021 – December 2022 data". From 2020 to 2022, the USA changed learning modality due to pandemic. According to the mosaic plot above, it seems that a majority of the schools were either in person or hybrid. By the end of 2022, schools were back to in person. It is fascinating that from 2020-2021, most of the schools are in-person/hybrid. You'd think that the U.S. would be more proactive with moving schools to remote for the sake of safety. 
 
 ```{r}
-# HIGH SCHOOL STUDENTS
+
 usaburnout <- read.csv("data/USA_burnout.csv")
 
 usaburnout$Year <- as.numeric(usaburnout$Year)
@@ -928,10 +959,22 @@ ggplot(data = actual_points, aes(x = Year, y = High_School)) +
   ) +
 
   theme(legend.position = "bottom")
-# 2020 vertical line to signify the start of pandemic 
-# some kinda predictive thing to show that predicted value for 2021 is lower than actual to show hella increase in slope
-
 ```
-- check the steady increase from 2019 to 2021 (COVID TIME)
-- could be because of the stress of pandemic and changes in school modality (refer to mosaic)
+
+```{r}
+usa_pisa <- all_scores_long |>
+  filter(country == "United States", subject == 'reading')
+
+ggplot(finland_pisa, aes(x = year, y = score)) +
+  geom_line(color = "blue", linewidth = 1) + 
+  geom_point(color = "darkblue", size = 3) + 
+  scale_x_continuous(breaks = finland_pisa$year) +
+  labs(
+    title = "USA's PISA Reading Scores Over Time",
+    x = "Year",
+    y = "PISA Reading Score"
+  ) +
+  theme_minimal()
+```
+
 
