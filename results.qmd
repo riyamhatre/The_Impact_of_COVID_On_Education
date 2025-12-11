@@ -716,16 +716,6 @@ As you can see in both 2018 and 2022, there is a positive correlation between GD
 
 Some specifics: We can see that from 2018-2022, Singapore's GDP per capita increased, as well as the PISA score. However, the United States just saw an increase in GDP per Capita and a decrease in PISA scores. In the plots above comparing GDP and spending on education, we see that the USA does spend a good amount on education. It could be possible that there were other factors at play, such as the pandemic and the stressors that came with it, that caused the scores to drop despite the country getting back on its feet in 2022. 
 
-=======
-Since we know educational spending is correlated with PISA scores, and it is correlated with GDP, GDP is likely correlated with PISA scores as well. Let's check.
-- pisa vs gdp 
-  -bc gdp and spending are correlated we see the same type of corr so this prove that gdp and spending are correlated 
-- GRAPH TO BE CREATED
-  
-we end on how has GDP changed (graph: GDP 2018-2022)
-- get rid of insane colors 
-- color with red and green--> threshold of the expected slope 
->>>>>>> e6d9cf5243d83d425c30e672f97143065f09a7a6
 ```{r}
 gdp_2018 <- read.csv('data/2018_GDP.csv') |>
   mutate(country = Country, score = Score, gdp = GDP, year="2018") |>
@@ -781,14 +771,12 @@ cynicism_plot <- ggplot(data_cynicism_long,
             inherit.aes = FALSE,
             alpha = 0.25) +
   
-  # --- VERTICAL LINE AT 2020 ---
   geom_vline(aes(xintercept = 2020, linetype = "Pandemic starts"),
              linewidth = 1) +
   
   geom_line(linewidth = 1) +
   geom_point(size = 3) +
   
-  # ---- LEGENDS FOR EXTRA ELEMENTS ----
   scale_fill_manual(
     name = NULL,
     values = c("Pandemic period" = "grey70")
@@ -951,7 +939,6 @@ Conclusion: The switch to distance learning was well-organized, but it ultimatel
 
 
 ### CASE STUDY: USA 
-- find a source to talk about whether the transition from diff modalities is trash and just generally how that transition went
 ```{r}
 
 #### school modality 
