@@ -75,8 +75,6 @@ library(ggridges)
 ```
 
 
-
-
 ```{r}
 # Loading in the PISA datasets:
 pisa2009 <- read.csv('data/2009_PISA.csv')
@@ -123,7 +121,7 @@ participation_df$total_participated <- as.factor(rowSums(participation_df[, -1] 
 
 
 ## Missing value analysis
-The OECD manages the PISA exam all over the world but each country must elect to participate. For a plethora of reasons, countries might not elect to participate, so not all countries participate in every PISA test. In order to model that, we created an alluvial plot to see how many countries participate and in which tests.
+The OECD manages the PISA exam all over the world, but each country must elect to participate. For a plethora of reasons, countries might not elect to participate, so not all countries participate in every PISA test. In order to model that, we created an alluvial plot to see how many countries participate and in which tests.
 
 ```{r}
 ggplot(data = participation_df,
@@ -140,8 +138,7 @@ ggplot(data = participation_df,
         plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
         axis.title.x = element_blank())
 ```
-From the plot, we can see that a majority of the participating countries participate every year, which is good for some long term analysis. The next largest group seems to be countries that have participated in 2 tests and most of those countries either participated in just the first two (2009 and 2012) or the last two (2018 and 2022). There are also several countries that have only participated once and those countries are pretty evenly split on which test they participated in.
-
+From the plot, we can see that a majority of the participating countries participate every year, which is good for some long-term analysis. The next largest group seems to be countries that have participated in 2 tests, and most of those countries either participated in just the first two (2009 and 2012) or the last two (2018 and 2022). There are also several countries that have only participated once, and those countries are pretty evenly split on which test they participated in.
 
 ```{r}
 library(tidyverse)
@@ -214,12 +211,11 @@ map_pisa
 The most significant insight is that the massive amount of gray ("NA") data is not random, but systematic.
 Missingness largely correlates with lower-income nations (most of Africa, Central Asia, and parts of the Middle East). PISA is expensive and complex. The countries that need standardized educational assessment data the most are often the ones that cannot afford to participate. This creates a global knowledge gap, where comparative educational research is heavily biased toward the wealthier, developed world (OECD members and partners). Any "global" trend analysis drawn from this map is inherently incomplete.
 
-Countries colored deep blue (participated only once) are "partially" missing from trend analysis.A single data point provides a snapshot but fails to reveal the long-term impact of educational reforms, which requires sustained participation.
+Countries colored deep blue (participated only once) are “partially” missing from the trend analysis. A single data point provides a snapshot but fails to reveal the long-term impact of educational reforms, which requires sustained participation.
+The gray areas indicate educational research exclusion and data inequality.
 
-The gray areas are an indicator of educational research exclusion and data inequality.
-
-There are also reports of certain countries (like India - TamilNadu Himachal Pradesh) that took the test once, and were shocked by the nation's poor performance. Therefore, they stopped participating in the tests. 
+There are also reports of certain countries (like India - Tamil Nadu, Himachal Pradesh) that took the test once and were shocked by the nation’s poor performance. Therefore, they stopped participating in the tests.
 
 
 ### Lack of NANs
-Fortunately, this dataset was relatively clean and required minimal pre-processing. This is probably because there is a specific focus on a single statistic, PISA scores across multiple years. The structured nature of the PISA data means that the presence or absence of a value in one column is independent of values in other columns, eliminating complex dependency issues (the absence of a test score doesn't mean there is an absence of a demographic variable).
+Fortunately, this dataset was relatively clean and required minimal pre-processing. This is probably because there is a specific focus on a single statistic, PISA scores across multiple years. The structured nature of the PISA data means that the presence or absence of a value in one column is independent of values in other columns, eliminating complex dependency issues (the absence of a test score doesn’t indicate the absence of a demographic variable).

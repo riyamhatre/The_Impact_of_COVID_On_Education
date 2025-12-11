@@ -1,11 +1,5 @@
 # Results
 #### Required Packages and Data Loading
-
-### Background
-
-The main thing we are investigating is whether or not COVID affected the PISA scores (a test taken by high school students) of students. To effectively check whether it was indeed COVID that affected the PISA scores, or some other factors, we approached this using the funnel method, where we looked at the high level trends in the data. From there, we started noticing patterns, asking more questions, and gathering more data to further investigate our main mission. 
-
-
 ```{r}
 # install.packages(c("dplyr","tidyr","ggplot2","ggalluvial","forcats",'ggtext'))
 library(dplyr) 
@@ -93,11 +87,14 @@ all_scores_long <- bind_rows(
   mutate(all_science_scores_long, subject = "science")
 )
 ```
+### Background
 
-### global trends 
+Our main research question is “Did COVID affect educational outcomes?” To answer this, we utilized the PISA scores from 2012 to 2022. The PISA is a standardized test developed by the OECD for high schoolers to compare educational outcomes across the world. To effectively examine the pandemic’s effect on education, we employed the funnel method, which involves examining high-level trends in the data. From there, we began to notice patterns, ask more questions, and gather additional data to further investigate our primary mission.
+
+
+### Global Educational Trends
 
 Let's now take a look at the PISA data:
-
 ```{r}
 ggplot(all_scores_long, aes(x = score, y = fct_reorder(as.factor(year), year, .desc = TRUE))) +
   geom_density_ridges(fill = "blue") +
@@ -106,11 +103,11 @@ ggplot(all_scores_long, aes(x = score, y = fct_reorder(as.factor(year), year, .d
   ylab("Year") +
   xlab("Score")
 ```
-In 2009, the distribution is slightly bimodal, with a shallow peak around score 425 and a tall peak at score 475. Slowly, as the years go on, the peaks are getting closer in size. We cannot determine exactly what is changing but some explanations could be that: 
-- Countries from the "right peak" are getting worse scores, thus becoming a part of the left peak
-- The different countries that are participating each year have different distributions of scores and so their participation/lack thereof changes the overall distribution we see
+In 2009, the distribution is slightly bimodal, with a shallow peak centered at score = 425 and a taller peak at score = 475. As the years pass, the peaks are slowly becoming closer in size. We cannot determine exactly what is changing, but some explanations could be that: 
+- Countries from the “right peak” are getting worse scores, thus becoming a part of the left peak 
+- The different countries that are participating each year have different distributions of scores, and so their participation/lack thereof changes the overall distribution we see
 
-The second explanation is less likely since we do see a trend and there is a low possibility that the participation/non-participation of countries each year created a very clear looking trend. However, let's test this out by looking at each country's individual change.
+The second explanation is less likely since we do see a trend, and there is a low possibility that the participation/non-participation of countries each year created a very clear trend. However, let’s test this out by looking at each country’s individual change.
 ```{r, fig.height=10, fig.width=12}
 # 
 all_scores_long |>
@@ -123,9 +120,9 @@ all_scores_long |>
   theme_linedraw() + 
   labs(color = "Year")
 ```
-Countries with score below 450 mostly have not greatly had their PISA scores change, as shown by the overlapping 2018 and 2019 points. The countries with scores greater than 450 all seem like their scores have changed. But specifically, the 2022 dots are mostly to the left of the 2018 dots, indicating that their scores went down. This supports the idea that higher scoring countries are getting worse scores and thus moving to the lower peak. 
+Countries with scores below 450 have not greatly changed their PISA scores, as shown by the overlapping 2018 and 2022 points. The countries with scores greater than 450 do not have overlapping points; thus, their scores have changed. Looking closer, we see that the 2022 dots are mostly to the left of the 2018 dots, indicating that their scores went down. This supports the idea that higher-scoring countries are scoring worse and thus moving to the lower peak.
 
-We now know that at least for 2018 to 2022, the PISA scores went down, but let's check the entire trend. 
+We now know that, at least from 2018 to 2022, the PISA scores decreased. Let’s check the entire trend.
 ```{r}
 # Plotting scores
 ggplot() + 
@@ -172,10 +169,7 @@ ggplot() +
 
 # Change the x axis to only show the years we wanna see
 ```
-Without context of previous years, we wouldn't have known that every year, all PISA scores have been dropping slowly. But this graph shows that the scores are slowly decreasing over time. However, it is a little hard to see whether the 2022 scores are far lower than the trend. Let's try to model where the average for 2022 should be with where it is.
-
-The OECD Average _______
-
+Without the context of previous years, we wouldn’t have known that every year, all PISA scores have been dropping slowly. This graph shows that the scores are slowly decreasing over time. However, it is difficult to see whether the 2022 scores are significantly lower than the trend. Let’s try to model where the average for 2022 should be against where it actually is.
 
 ```{r}
 # Reading Predictions
@@ -185,7 +179,6 @@ reading_model <- lm(score ~ year, data = reading_scores_train)
 
 # Predict for 2022
 predicted_value <- predict(reading_model, newdata = data.frame(year = 2022))
-print(predicted_value)
 
 # Plot new model
 ggplot() + 
@@ -211,7 +204,6 @@ math_model <- lm(score ~ year, data = math_scores_train)
 
 # Predict for 2022
 predicted_value <- predict(math_model, newdata = data.frame(year = 2022))
-print(predicted_value)
 
 # Plot new model
 ggplot() + 
@@ -238,7 +230,6 @@ science_model <- lm(score ~ year, data = science_scores_train)
 
 # Predict for 2022
 predicted_value <- predict(science_model, newdata = data.frame(year = 2022))
-print(predicted_value)
 
 # Plot new model
 ggplot() + 
@@ -258,19 +249,17 @@ ggplot() +
   ggtitle("Predicting 2022 OECD Average Science Score") +
   theme_minimal()
 ```
-These graphs show where the trend for 2012-2018 is going and what the predicted value for 2022 would be with that trend, as well as where the actual value for 2022 is. For reading and math, there is a clear difference in the predicted and actual score where the actual score is much lower than expected. However, for science, the actual score was higher than expected which is interesting to note. 
+These graphs depict the trend for 2012-2018, with the predicted value for 2022 given that trend, and the actual value for 2022. For reading and math, there is, unsurprisingly, a clear difference between the predicted and actual scores; the true 2022 scores were much lower than the predicted. One shock was that science scores in 2022 were actually better than expected.
 
-Given only three data points, it is difficult to conclude a significant difference for 2022, however, these data points are summarized from the millions of students around the world that took the exam. Though we do not have several years of data, the data we do have is summarizing millions of data points, which should give some assurance to the credibility of the plot. 
+Given only three data points, it is difficult to conclude a significant difference for 2022; however, these data points are summarized from the millions of students globally who took the exam. Though we do not have several years of data, the data we do have summarizes millions of data points, which should give some assurance to the credibility of the plot. The “models” created had no intention of predicting future values accurately; they serve as a visual representation of how large a jump in scores there is from before the pandemic to after.
 
-The "models" that were created aren't necessarily made to predict values accurately; they serve as a visual representation of how large of a jump in scores there are from before the pandemic to after.
-
-Based on these graphs, we can conclude that there was some dip in educational outcomes from 2018 to 2022.
+Based on these graphs, we can conclude that there was a dip in educational outcomes from 2018 to 2022.
 
 
 ### Other factors
-We've shown there was a dip from 2018 to 2022 and though the pandemic was the most significant thing that happened that year, it is not guaranteed to be the only factor that caused the dip. Let's take a look at some other factors. 
+We’ve shown there was a dip from 2018 to 2022, and although the pandemic was the most significant event during that time, there is no guarantee that it was the only factor causing the dip. Let’s take a look at some other factors.
 
-One major indicator of education outcomes is educational expenditure. 
+One major indicator of education outcomes is educational expenditure.
 ```{r}
 
 countries_to_label <- c(
@@ -461,9 +450,9 @@ ggplot(pisa_points_2022, aes(x = Spending, y = Reading.Mean)) +
     plot.margin = margin(20, 20, 20, 20)
   )
 ```
-This graph clearly shows on the left that there is a pretty strong linear relationship between the PISA scores and educational spending. Some outliers do exist which indicate that spending is not the only indication of higher scores. Qatar spends significantly more money per student but their students do not score higher than even the OECD average PISA score. But overall, we can conclude that there is a positive correlation between PISA scores and educational spending. 
+This graph clearly shows a strong linear relationship between the PISA scores and educational spending on the left. Some outliers do exist, indicating that spending is not the only indication of higher scores. Qatar spends significantly more money per student, but its students do not score higher than even the OECD average. But overall, we can conclude that there is a positive correlation between PISA scores and educational spending.
 
-Educational expenditure by each country is based on a number of factors as well, including the general wealth of the country as a whole. If a country is not wealthy, they will not be able to spend as much on their students. Let's check if GDP and educational spending are correlated.
+Educational expenditure by each country is based on several factors, including the country’s general wealth. If a country is not wealthy, it will not be able to spend as much on its students. Let’s check if GDP and educational spending are correlated.
 ```{r}
 GDP_precovid<- read.csv('data/2018_GDP.csv')
 spending_precovid<- read.csv('data/2018_Spending.csv')
@@ -526,7 +515,7 @@ ggplot(merged_data, aes(x = GDP, y = Spending)) +
 
 # dashed is y = x
 ```
-GDP and educational spending seem very highly correlated with each other and there seems to be a strong linear correlation. There are some outliers that are making it look like there is not a constant variance but there are not enough of those points for the constant variance assumption to be broken. 
+GDP and educational spending seem to be highly linearly correlated. There are some outliers that suggest non-constant variance, but there are not enough of those points for the constant variance assumption to be broken.
 
 ```{r}
 
@@ -585,14 +574,12 @@ ggplot(merged_data2, aes(x = GDP, y = Spending)) +
     title = "GDP Per Capita vs. Spending Correlation (2022)",
     x = "GDP (in currency units from table)",
     y = "Spending (in currency units from table)",
-    caption = "Linear trend line (dark red) shows relationship. 
-    Dashed line (grey) is y=x."
+    caption = "Linear trend line (dark red) shows relationship"
   ) +
   theme_minimal() 
 
 # dashed is y = x
 ```
-<<<<<<< HEAD
 
 
 ```{r}
@@ -704,40 +691,15 @@ p <- ggplot() +
 
 print(p)
 ```
-As you can see in both 2018 and 2022, there is a positive correlation between GDP per Capita and PISA scores. We can connect this correlation to the graphs above regarding GDP per capita and how much a country spends on education. If a company has more money to spare and is doing good economically, then there are more resources for education. If there are more resources, then students are better prepared for exams such as PISA, and therefore will do good on the exam. 
+In both 2018 and 2022, GDP per Capita and PISA scores are positively correlated. We can connect this correlation to the previous graphs regarding GDP per capita and educational expenditure. If a country has more money to spare and is doing well economically, then it has more resources for education. If there are more resources, then students are better prepared for exams such as PISA, and will therefore perform well on the exam.
 
-Some specifics: We can see that from 2018-2022, Singapore's GDP per capita increased, as well as the PISA score. However, the United States just saw an increase in GDP per Capita and a decrease in PISA scores. In the plots above comparing GDP and spending on education, we see that the USA does spend a good amount on education. It could be possible that there were other factors at play, such as the pandemic and the stressors that came with it, that caused the scores to drop despite the country getting back on its feet in 2022. 
+Some specifics: We can see that from 2018-2022, Singapore’s GDP per capita and PISA scores increased. However, the United States saw an increase in GDP per Capita and a decrease in PISA scores. In the plots above comparing GDP and spending on education, we see that the USA spends generously on its students’ education. Other factors, including the emotional stress of the pandemic, could have yielded lower scores despite the economic resurgence by 2022.
 
-```{r}
-gdp_2018 <- read.csv('data/2018_GDP.csv') |>
-  mutate(country = Country, score = Score, gdp = GDP, year="2018") |>
-  select("country", "score", "gdp", "year")
-gdp_2022 <- read.csv('data/2022_GDP.csv') |>
-  left_join(filter(all_reading_scores_long, year == 2022), by=c("Country" = "country")) |>
-  mutate(country = Country, gdp = GDP, year="2022") |>
-  select("country", "score", "gdp", "year")
-
-gdp <- bind_rows(gdp_2018, gdp_2022) 
-# |>
-  #pivot_wider(names_from = year, values_from = gdp, names_prefix = "gdp_", values_fn = first) |>
-  #mutate(change = gdp_2022 - gdp_2018)
-
-ggplot(gdp, aes(x = as.factor(year), y = gdp, group = country)) +
-  geom_line(aes(color = country), linewidth = 1) +
-  geom_point(size = 3) +
-  labs(title = "GDP Trend: 2018 to 2022",
-       x = "Year", y = "GDP") +
-  theme(legend.position = "none") 
-```
-- has not increased as much as it did previously
-- GDP will typically increase but the increase that we see here is not as high as the increase that we would typically want to see - largest reason for that is covid 
-- though we can't say that COVID is the only reason why the education system has changed, a lot of the other factors that affect education outcomes were effected by covid 
-
-We found that educational spending and GDP per capita are also factors in PISA outcomes. Educational spending also depends greatly on GDP and we know GDP took a dip during the pandemic. Thus several typical factors for educational outcomes were also affected by the pandemic. Though we can't guarantee the pandemic is the sole cause for the education dip  from 2018 to 2022, several other factors in educational outcomes were also affected by the pandemic, indicating that the pandemic likely had the largest effect.
+We found that educational spending and GDP per capita are also factors in PISA outcomes. Educational spending also depends heavily on GDP, and we know GDP took a dip during the pandemic. Thus, several typical factors for educational outcomes were also affected by the pandemic. We cannot guarantee the pandemic is the sole cause of the educational dip from 2018 to 2022, but several other factors to educational outcomes were also affected by the pandemic, indicating that the pandemic likely had the largest effect.
 
 
 ### CASE STUDY: FINLAND
-Finland's transition to distance learning went well, but the effect of switching meant that students no longer had equal access to the resources provided at school and their resources were limited to their homes. Meaning, any difference or inequity of educational support in their home life directly affected their educational performance/outcomes. 
+Finland’s transition to distance learning went well, but the switch meant that students no longer had equal access to the resources provided at school, and their resources became limited by their homes. In other words, any difference or inequity of educational support in their home life directly affected their educational performance/outcomes.
 ```{r}
 data_cynicism <- read.csv("data/cynicism_finland.csv")
 data_cynicism <- data_cynicism |>
@@ -815,7 +777,7 @@ cynicism_plot <- ggplot(data_cynicism_long,
 print(cynicism_plot)
 ```
 
-As seen in the graph above, in the years before the pandemic, the percent of students reporting cynicism is fairly stable. If you take a look at 2019, the year before the pandemic, to 2021, (with 2020 being the beginning of the pandemic) there is a sharp increase in the graph. Just visually you can see that stark increase. We could hypothesize that the reasoning for this was the increased strain on students during COVID. 
+As shown in the graph above, the percentage of students reporting cynicism prior to the pandemic was fairly stable. If you compare that with the jump from 2019 (just before the pandemic) to 2021 (just after), there is a sharp increase. Just visually, you can see that stark increase. We could hypothesize that the reasoning behind this was the increased emotional strain on students during the pandemic.
 
 ```{r}
 data <- read.csv("data/school_burnout_finland.csv")
@@ -903,7 +865,7 @@ ggplot(data = actual_points, aes(x = Year, y = High_school)) +
   ) +
   theme(legend.position = "bottom")
 ```
-In addition, we can see here that there is a sharp percentage increase from 2019-2021. Visually, we can see that there percentage value change over the years before 2019 were not extremely drastic. However, the change from 2019-2021 is quite dramatic. We can see that based on the trend, the predicted value for 2021 is significantly lower than the actual value, meaning that the increase is significant. 
+We can see the same stark increase in the percentage of burnt-out students in this graph as well. Again, the percentage of burnout students remains fairly constant until the jump from 2019 to 2021. The actual burnt-out value for 2021 is far higher than the predicted value, indicating that the difference is likely significant.
 
 ```{r}
 finland_pisa <- all_scores_long |>
@@ -921,13 +883,11 @@ ggplot(finland_pisa, aes(x = year, y = score)) +
   theme_minimal()
 ```
 
-As you can see in the graph above, there is a sharp drop in scores from 2018-2022 for Finland. It aligns with the graphs above that plotted the pisa scores for all countries together, in the sense that there is a sharp drop from 2018-2022. Going back to the cynicism and burnout plots, we could state that because of the pandemic, students were feeling very cynical about their lives and burnout by the strain that came from surviving a global pandemic. 
+The graph above shows a sharp dip in scores from 2018 to 2022 for Finland. This aligns with the previous PISA score graphs for all countries, which also showed a significant dip from 2018 to 2022. From the cynicism and burnout plots, we can hypothesize that students felt more cynical due to their lockdown lives and burnt out by the strain of living through the global pandemic. 
 
-The transition to distance learning during the pandemic led to decreased engagement among students, teachers, and principals. This shift significantly increased stress and burnout for educators, with principals feeling the effects of their teachers' struggles. Teachers found it difficult to compensate for the inconsistent support students received back home.
+The transition to distance learning during the pandemic led to decreased engagement among students, teachers, and principals. This shift significantly increased stress and burnout for educators, with principals feeling the effects of their teachers’ struggles. Teachers found it difficult to compensate for the inconsistent support students received back home. Students were not getting the support that they needed.
 
-Students were not getting the support that they need. 
-
-Conclusion: The switch to distance learning was well-organized, but it ultimately made fairness in education worse and damaged the conditions needed for students to learn well and feel supported.
+Conclusion: The switch to distance learning was well-organized, but it ultimately worsened fairness in education and removed the conditions students needed to learn and feel supported.
 
 
 ### CASE STUDY: USA 
@@ -954,9 +914,9 @@ mosaic(
   main = "Learning Modality by Year")
 ```
 
-To create this mosaic plot, we used "K-12 public and independent charter school districts for the 2021-2022 school year and the Fall 2022 semester, from August 2021 – December 2022 data". From 2020 to 2022, the USA changed learning modality due to pandemic. According to the mosaic plot above, it seems that a majority of the schools were either in person or hybrid. By the end of 2022, schools were back to in person. It is fascinating that from 2020-2021, most of the schools are in-person/hybrid. You'd think that the U.S. would be more proactive with moving schools to remote for the sake of safety. 
+To create this mosaic plot, we used the “K-12 public and independent charter school districts for the 2021-2022 school year and the Fall 2022 semester, from August 2021 – December 2022” data. From 2020 to 2022, the USA changed learning modality due to the pandemic. According to the mosaic plot above, the majority of schools were either in-person or hybrid. By the end of 2022, almost all schools went back to in-person. Considering the severity of the pandemic, the percentage of in-person and hybrid schools is worrisome. It does not seem like the U.S. was proactive in moving schools to remote learning for the sake of safety.
 
-It is true that the U.S.A did have a moment in time where most schools were remote, according to the National Center for Education Statistics. However, it took some time for majority of the schools to implement this, due to some backlash from the public about the effects of remote learning, as well as whether COVID was significant enough to make such a drastic decision about education. 
+It is true that the U.S. was able to get most schools to be remote, according to the National Center for Education Statistics. However, many schools took some time to implement this, due to backlash from the public about the effects of remote learning, as well as whether COVID was dangerous enough to make such a drastic decision regarding education. 
 
 ```{r}
 
@@ -1046,7 +1006,7 @@ ggplot(data = actual_points, aes(x = Year, y = High_School)) +
 
   theme(legend.position = "bottom")
 ```
-We can also observe a sharp jump in the percentage between 2019 and 2021. Prior to 2019, the year-to-year changes were relatively modest, but the increase during this period is unusually large. The model’s predicted value for 2021 is much lower than the actual data point, highlighting how substantial this rise truly is.
+We can also observe a sharp jump in the percentage between 2019 and 2021. Prior to 2019, the year-to-year changes were relatively modest, but the increase during this period is unusually large. The model’s predicted value for 2021 is considerably lower than the actual data point, highlighting the impact of the pandemic.
 
 ```{r}
 usa_pisa <- all_scores_long |>
@@ -1063,6 +1023,4 @@ ggplot(finland_pisa, aes(x = year, y = score)) +
   ) +
   theme_minimal()
 ```
-As you can see in the graph above, there is a sharp drop in scores from 2018-2022 for the USA, just like what we saw for Finland. We can conclude the same things we did for Finland, with students feeling very cynical about their lives and burnout by the strain that came from surviving a global pandemic, hence the drop in scores. According to the Annie E. Casey Foundation, in the U.S., the abrupt transition to remote learning significantly disrupted student education by reducing instructional time and engagement, leading to difficulties with focus and a reluctance to seek help. This shift was also caused by a digital divide, which negatively affected marginalized students because of unequal internet access, increasing dropout rates. There was a widespread mental health crisis, marked by higher rates of stress, anxiety, and depression. Teachers had to rapidly adjust and trim their curriculums due to limited time.
-
-
+The graph above displays a sharp drop in scores from 2018 to 2022 for the USA, similar to Finland. We can conclude the same things we did for Finland, with students feeling very cynical about their lives and burnt out by the strain that came from surviving a global pandemic, hence the drop in scores. According to the Annie E. Casey Foundation, in the U.S., the abrupt transition to remote learning significantly disrupted student education by reducing instructional time and engagement, leading to difficulties with focus and a reluctance to seek help. This shift was also caused by a digital divide, which negatively affected marginalized students because of unequal internet access, increasing dropout rates. There was a widespread mental health crisis, marked by higher rates of stress, anxiety, and depression. Additionally, teachers continuously had to rapidly adjust and trim their curricula due to limited time.
