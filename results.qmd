@@ -102,7 +102,8 @@ Let's now take a look at the PISA data:
 ggplot(all_scores_long, aes(x = score, y = fct_reorder(as.factor(year), year, .desc = TRUE))) +
   geom_density_ridges(fill = "blue") +
   ggtitle("Overall PISA Scores Over Time") +
-  ylab("year")
+  ylab("Year") +
+  xlab("Score")
 ```
 In 2009, the distribution is slightly bimodal, with a shallow peak around score 425 and a tall peak at score 475. Slowly, as the years go on, the peaks are getting closer in size. We cannot determine exactly what is changing but some explanations could be that: 
 - Countries from the "right peak" are getting worse scores, thus becoming a part of the left peak
@@ -110,11 +111,12 @@ In 2009, the distribution is slightly bimodal, with a shallow peak around score 
 
 The second explanation is less likely since we do see a trend and there is a low possibility that the participation/non-participation of countries each year created a very clear looking trend. However, let's test this out by looking at each country's individual change.
 ```{r, fig.height=10, fig.width=12}
+# 
 all_scores_long |>
   filter(year > 2017) |>
   filter(!is.na(score)) |>
   ggplot(aes(x = score, y = fct_reorder2(country, year=="2022", score, .desc=FALSE), color=as.factor(year))) +
-  geom_point(alpha=0.5) +
+  geom_point(alpha=0.5, size=3) +
   ggtitle("PISA Scores in 2018 vs. 2022") +
   ylab("") +
   theme_linedraw() + 
@@ -135,8 +137,8 @@ ggplot() +
   scale_color_manual(values = c("Individual Countries" = "black", 
                                 "OECD Average" = "red")) +
   scale_x_continuous(breaks = c(2012, 2015, 2018, 2022)) +
-  labs(x = "Year", y = "OECD Average Reading Scores") +
-  ggtitle("OECD Average Reading Scores from 2012-2022") +
+  labs(x = "Year", y = "PISA Reading Scores") +
+  ggtitle("PISA Reading Scores from 2012-2022") +
   theme_minimal()
 
 ggplot() + 
@@ -149,8 +151,8 @@ ggplot() +
   scale_color_manual(values = c("Individual Countries" = "black", 
                                 "OECD Average" = "red")) +
   scale_x_continuous(breaks = c(2012, 2015, 2018, 2022)) +
-  labs(x = "Year", y = "OECD Average Math Scores") +
-  ggtitle("OECD Average Math Scores from 2012-2022") +
+  labs(x = "Year", y = "PISA Math Scores") +
+  ggtitle("PISA Math Scores from 2012-2022") +
   theme_minimal()
 
 ggplot() + 
@@ -163,8 +165,8 @@ ggplot() +
   scale_color_manual(values = c("Individual Countries" = "black", 
                                 "OECD Average" = "red")) +
   scale_x_continuous(breaks = c(2012, 2015, 2018, 2022)) +
-  labs(x = "Year", y = "OECD Average Science Scores") +
-  ggtitle("OECD Average Science Scores from 2012-2022") +
+  labs(x = "Year", y = "PISA Science Scores") +
+  ggtitle("PISA Science Scores from 2012-2022") +
   theme_minimal()
 
 # Change the x axis to only show the years we wanna see
@@ -265,13 +267,9 @@ Based on these graphs, we can conclude that there was some dip in educational ou
 
 
 ### Other factors
-We've shown there was a dip from 2018 to 2022 and though the pandemic was the most significant thing that happened that year, it is not guaranteed to be the only 
-- intro to this section is gonna be: we have now concluded that there is a sig dip from 2018-2022 but we can't say it's just bc of covid so lets look at some other factors 
----> see if there is a correlation between COVID and GDP, COVID and spending
+We've shown there was a dip from 2018 to 2022 and though the pandemic was the most significant thing that happened that year, it is not guaranteed to be the only factor that caused the dip. Let's take a look at some other factors. 
 
-
-- pisa vs spending
-  - diff countries spend diff 
+One major indicator of education outcomes is educational expenditure. 
 ```{r}
  #| fig-width: 8
  #| fig-height: 20
@@ -369,9 +367,11 @@ ggplot(pisa_points, aes(x = Spending, y = Score)) +
   )
 
 ```
+This graph clearly shows on the left that there is a pretty strong linear relationship between the PISA scores and educational spending. Some outliers do exist which indicate that spending is not the only indication of higher scores. Qatar spends significantly more money per student but their students do not score higher than even the OECD average PISA score. But overall, we can conclude that there is a positive correlation between PISA scores and educational spending. 
+
 
 ```{r}
-
+# Match scale with previous plot 
  #| fig-width: 8
  #| fig-height: 12
 
@@ -470,14 +470,7 @@ ggplot(pisa_points, aes(x = Spending, y = Reading.Mean)) +
 
 ```
 
-- graph: spending 2018 - 2022
-  - woah change or no change 
-    - change could be bc of gdp if a country has more money they will spend more on ending 
-
-GRAPH TO BE CREATED
-
-- GDP vs spending 
-  - there is a corr 
+Educational expenditure by each country is based on a number of factors as well, including the general wealth of the country as a whole. If a country is not wealthy, they will not be able to spend as much on their students. Let's check if GDP and educational spending are correlated.
 ```{r}
 GDP_precovid<- read.csv('data/2018_GDP.csv')
 spending_precovid<- read.csv('data/2018_Spending.csv')
@@ -505,7 +498,7 @@ target_countries <- c(
 
 ggplot(merged_data, aes(x = GDP, y = Spending)) +
   geom_point(color = "blue", size = 2) +
-  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "grey50") +
+  # geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "grey50") +
   geom_smooth(method = "lm", se = FALSE, color = "darkred") +
   
   geom_text_repel(
@@ -541,6 +534,7 @@ ggplot(merged_data, aes(x = GDP, y = Spending)) +
 
 # dashed is y = x
 ```
+GDP and educational spending seem very highly correlated with each other and there seems to be a strong linear correlation. There are some outliers that are making it look like there is not a constant variance but there are not enough of those points for the constant variance assumption to be broken. 
 
 ```{r}
 
@@ -606,7 +600,7 @@ ggplot(merged_data2, aes(x = GDP, y = Spending)) +
 
 # dashed is y = x
 ```
-
+Since we know educational spending is correlated with PISA scores, and it is correlated with GDP, GDP is likely correlated with PISA scores as well. Let's check.
 - pisa vs gdp 
   -bc gdp and spending are correlated we see the same type of corr so this prove that gdp and spending are correlated 
 - GRAPH TO BE CREATED
@@ -638,7 +632,7 @@ ggplot(gdp, aes(x = as.factor(year), y = gdp, group = country)) +
 - has not increased as much as it did previously
 - GDP will typically increase but the increase that we see here is not as high as the increase that we would typically want to see - largest reason for that is covid 
 - though we can't say that COVID is the only reason why the education system has changed, a lot of the other factors that affect education outcomes were effected by covid 
-
+We found that educational spending and GDP per capita are also factors in PISA outcomes. Educational spending also depends greatly on GDP and we know GDP took a dip during the pandemic. Thus several typical factors for educational outcomes were also affected by the pandemic. Though we can't guarantee the pandemic is the sole cause for the education dip  from 2018 to 2022, several other factors in educational outcomes were also affected by the pandemic, indicating that the pandemic likely had the largest effect.
 
 
 ### CASE STUDY: FINLAND

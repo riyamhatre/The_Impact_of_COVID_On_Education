@@ -78,12 +78,6 @@ pisa2012 <- read.csv('data/2012_PISA.csv')
 pisa2015 <- read.csv('data/2015_PISA.csv')
 pisa2018 <- read.csv('data/2018_PISA.csv')
 pisa2022 <- read.csv('data/2022_PISA.csv')
-```
-
-
-## Missing value analysis
-The OECD manages the PISA exam all over the world but each country must elect to participate.
-```{r}
 
 # List of country participation across years:
 participation_list <- list(
@@ -121,6 +115,10 @@ participation_df$`2022` <- replace_na(participation_df$`2022`, "not participated
 participation_df$total_participated <- as.factor(rowSums(participation_df[, -1] == "participated", na.rm = TRUE))
 ```
 
+
+## Missing value analysis
+The OECD manages the PISA exam all over the world but each country must elect to participate. For a plethora of reasons, countries might not elect to participate, so not all countries participate in every PISA test. In order to model that, we created an alluvial plot to see how many countries participate and in which tests.
+
 ```{r}
 ggplot(data = participation_df,
        aes(axis1 = `2009`, axis2 = `2012`, axis3 = `2015`, axis4 = `2018`, axis5=`2022`)) +
@@ -136,7 +134,7 @@ ggplot(data = participation_df,
         plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
         axis.title.x = element_blank())
 ```
-
+From the plot, we can see that a majority of the participating countries participate every year, which is good for some long term analysis. The next largest group seems to be countries that have participated in 2 tests and most of those countries either participated in just the first two (2009 and 2012) or the last two (2018 and 2022). There are also several countries that have only participated once and those countries are pretty evenly split on which test they participated in.
 
 
 ```{r}
