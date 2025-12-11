@@ -208,7 +208,7 @@ map_pisa
 
 ```
 The most significant insight is that the massive amount of gray ("NA") data is not random, but systematic.
-Missingness largely correlates with lower-income nations (most of Africa, Central Asia, and parts of the Middle East). PISA is expensive and complex. The countries that need standardized educational assessment data the most are often the ones that cannot afford to participate.This creates a global knowledge gap, where comparative educational research is heavily biased toward the wealthier, developed world (OECD members and partners). Any "global" trend analysis drawn from this map is inherently incomplete.
+Missingness largely correlates with lower-income nations (most of Africa, Central Asia, and parts of the Middle East). PISA is expensive and complex. The countries that need standardized educational assessment data the most are often the ones that cannot afford to participate. This creates a global knowledge gap, where comparative educational research is heavily biased toward the wealthier, developed world (OECD members and partners). Any "global" trend analysis drawn from this map is inherently incomplete.
 
 Countries colored deep blue (participated only once) are "partially" missing from trend analysis.A single data point provides a snapshot but fails to reveal the long-term impact of educational reforms, which requires sustained participation.
 
@@ -217,4 +217,5 @@ The gray areas are an indicator of educational research exclusion and data inequ
 There are also reports of certain countries (like India - TamilNadu Himachal Pradesh) that took the test once, and were shocked by the nation's poor performance. Therefore, they stopped participating in the tests. 
 
 
-
+### Lack of NANs
+Fortunately, this dataset was relatively clean and required minimal pre-processing. This is probably because there is a specific focus on a single statistic, PISA scores across multiple years. The structured nature of the PISA data means that the presence or absence of a value in one column is independent of values in other columns, eliminating complex dependency issues (the absence of a test score doesn't mean there is an absence of a demographic variable).

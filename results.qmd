@@ -21,7 +21,7 @@ library(rnaturalearthdata)
 library(patchwork)
 library(ggrepel)
 library(vcd)
-library(scales) # Required for label_number()
+library(scales) 
 #library(Lock5withR)
 ```
 
@@ -509,7 +509,6 @@ ggplot(merged_data, aes(x = GDP, y = Spending)) +
   geom_smooth(method = "lm", se = FALSE, color = "darkred") +
   
   geom_text_repel(
-    # Filter data to only label the target countries
     data = merged_data[merged_data$Country %in% target_countries, ], 
     aes(label = Country), 
     size = 3,                       
@@ -607,13 +606,120 @@ ggplot(merged_data2, aes(x = GDP, y = Spending)) +
 # dashed is y = x
 ```
 
-- pisa vs gdp 
-  -bc gdp and spending are correlated we see the same type of corr so this prove that gdp and spending are correlated 
-- GRAPH TO BE CREATED
-  
-we end on how has GDP changed (graph: GDP 2018-2022)
-- get rid of insane colors 
-- color with red and green--> threshold of the expected slope 
+
+```{r}
+GDP_PISA_2018 <- read.csv('data/2018_GDP.csv')  |>
+  mutate(Year = 2018)
+
+df_gdp_2022 <- read.csv('data/2022_GDP.csv')
+df_scores_2022 <- read.csv('data/2022_PISA.csv')
+
+GDP_PISA_2022 <- inner_join(
+    df_gdp_2022  |> select(Country, GDP),
+    df_scores_2022  |> rename(Score = `Reading.Mean`) 
+     |> select(Country, Score),
+    by = "Country"
+  )  |>
+  mutate(Year = 2022)
+
+combined_data <- bind_rows(GDP_PISA_2018, GDP_PISA_2022)
+
+target_countries <- c(
+  "United States", "Japan", "Qatar", "Greece", "Indonesia", "Germany",
+  "Australia", "Romania", "Finland", "Singapore", "China",
+  "Cyprus", "Panama"
+)
+
+df_oecd <- combined_data  |>
+  filter(Country == "OECD average")
+
+df_countries <- combined_data  |>
+  filter(Country != "OECD average")
+
+df_labels <- df_countries  |>
+  filter(Country %in% target_countries)
+
+df_unlabeled <- df_countries  |>
+  filter(!(Country %in% target_countries))
+
+y_min <- min(df_countries$Score, na.rm = TRUE) - 10
+y_max <- max(df_countries$Score, na.rm = TRUE) + 10
+x_max <- max(df_countries$GDP, na.rm = TRUE)
+
+
+p <- ggplot() +
+  geom_point(data = df_unlabeled,
+             # Map 'Year' to color
+             aes(x = GDP, y = Score, color = factor(Year)),
+             size = 2) +
+
+  geom_point(data = df_labels,
+             aes(x = GDP, y = Score, color = factor(Year)),
+             size = 2) +
+
+  geom_text_repel(
+    data = df_labels,
+    aes(x = GDP, y = Score, label = Country, color = factor(Year)),
+    box.padding = 0.2,
+    point.padding = 0.1,
+    segment.color = 'black',
+    segment.size = 0.3,
+    min.segment.length = 0,
+    force = 20,
+    force_pull = 20,
+    max.overlaps = Inf,
+    size = 2.5,
+    show.legend = FALSE 
+  ) +
+
+  geom_hline(data = df_oecd,
+             aes(yintercept = Score, color = factor(Year), 
+                 linetype = factor(Year)),
+             size = 1) +
+
+  geom_text(data = df_oecd,
+            aes(x = x_max,
+                y = Score,
+                label = paste0("OECD Avg (", Year, ")"),
+                color = "black"),
+            hjust = 1, vjust = -0.1,
+            size = 3,
+            show.legend = FALSE) +
+
+  scale_color_manual(
+      name = "Year",
+      values = c("2018" = "darkblue", "2022" = "darkred")
+  ) +
+  scale_linetype_manual(
+      name = "Year",
+      values = c("2018" = "dashed", "2022" = "solid")
+  ) +
+
+  # Labels and scales
+  labs(title = "PISA Score vs. GDP Per Capita 2018 vs. 2022",
+       x = "GDP Per Capita",
+       y = "PISA Score",
+       color = "Year") + 
+  scale_x_continuous(labels = label_number(big.mark = ",", 
+                                           decimal.mark = ".")) +
+
+  ylim(y_min, y_max) +
+
+
+  theme_minimal() +
+
+  guides(
+      color = guide_legend(override.aes = list(linetype = 
+                                                 c("dashed", "solid"))),
+      linetype = "none" 
+  )
+
+print(p)
+```
+As you can see in both 2018 and 2022, there is a positive correlation between GDP per Capita and PISA scores. We can connect this correlation to the graphs above regarding GDP per capita and how much a country spends on education. If a company has more money to spare and is doing good economically, then there are more resources for education. If there are more resources, then students are better prepared for exams such as PISA, and therefore will do good on the exam. 
+
+Some specifics: We can see that from 2018-2022, Singapore's GDP per capita increased, as well as the PISA score. However, the United States just saw an increase in GDP per Capita and a decrease in PISA scores. In the plots above comparing GDP and spending on education, we see that the USA does spend a good amount on education. It could be possible that there were other factors at play, such as the pandemic and the stressors that came with it, that caused the scores to drop despite the country getting back on its feet in 2022. 
+
 ```{r}
 gdp_2018 <- read.csv('data/2018_GDP.csv') |>
   mutate(country = Country, score = Score, gdp = GDP, year="2018") |>
@@ -809,9 +915,6 @@ ggplot(data = actual_points, aes(x = Year, y = High_school)) +
     )
   ) +
   theme(legend.position = "bottom")
-
-# 2020 vertical line to signify the start of pandemic 
-# some kinda predictive thing to show that predicted value for 2021 is lower than actual to show hella increase in slope
 ```
 In addition, we can see here that there is a sharp percentage increase from 2019-2021. Visually, we can see that there percentage value change over the years before 2019 were not extremely drastic. However, the change from 2019-2021 is quite dramatic. We can see that based on the trend, the predicted value for 2021 is significantly lower than the actual value, meaning that the increase is significant. 
 
@@ -820,9 +923,9 @@ finland_pisa <- all_scores_long |>
   filter(country == "Finland", subject == 'reading')
 
 ggplot(finland_pisa, aes(x = year, y = score)) +
-  geom_line(color = "blue", linewidth = 1) +  # Adds the line, set color and thickness
-  geom_point(color = "darkblue", size = 3) + # Adds the points for each data year
-  scale_x_continuous(breaks = finland_pisa$year) + # Ensures every year has a label on the x-axis
+  geom_line(color = "blue", linewidth = 1) +  
+  geom_point(color = "darkblue", size = 3) + 
+  scale_x_continuous(breaks = finland_pisa$year) + 
   labs(
     title = "Finland's PISA Reading Scores Over Time",
     x = "Year",
@@ -835,7 +938,7 @@ As you can see in the graph above, there is a sharp drop in scores from 2018-202
 
 The transition to distance learning during the pandemic led to decreased engagement among students, teachers, and principals. This shift significantly increased stress and burnout for educators, with principals feeling the effects of their teachers' struggles. Teachers found it difficult to compensate for the inconsistent support students received back home.
 
-Students are not getting the support that they need. TABLE SPENDING TREND 2018-2022 
+Students were not getting the support that they need. 
 
 Conclusion: The switch to distance learning was well-organized, but it ultimately made fairness in education worse and damaged the conditions needed for students to learn well and feel supported.
 
@@ -871,6 +974,8 @@ mosaic(
 ```
 
 To create this mosaic plot, we used "K-12 public and independent charter school districts for the 2021-2022 school year and the Fall 2022 semester, from August 2021 – December 2022 data". From 2020 to 2022, the USA changed learning modality due to pandemic. According to the mosaic plot above, it seems that a majority of the schools were either in person or hybrid. By the end of 2022, schools were back to in person. It is fascinating that from 2020-2021, most of the schools are in-person/hybrid. You'd think that the U.S. would be more proactive with moving schools to remote for the sake of safety. 
+
+It is true that the U.S.A did have a moment in time where most schools were remote, according to the National Center for Education Statistics. However, it took some time for majority of the schools to implement this, due to some backlash from the public about the effects of remote learning, as well as whether COVID was significant enough to make such a drastic decision about education. 
 
 ```{r}
 
@@ -977,5 +1082,6 @@ ggplot(finland_pisa, aes(x = year, y = score)) +
   ) +
   theme_minimal()
 ```
+As you can see in the graph above, there is a sharp drop in scores from 2018-2022 for the USA, just like what we saw for Finland. We can conclude the same things we did for Finland, with students feeling very cynical about their lives and burnout by the strain that came from surviving a global pandemic, hence the drop in scores. According to the Annie E. Casey Foundation, in the U.S., the abrupt transition to remote learning significantly disrupted student education by reducing instructional time and engagement, leading to difficulties with focus and a reluctance to seek help. This shift was also caused by a digital divide, which negatively affected marginalized students because of unequal internet access, increasing dropout rates. There was a widespread mental health crisis, marked by higher rates of stress, anxiety, and depression. Teachers had to rapidly adjust and trim their curriculums due to limited time.
 
 
